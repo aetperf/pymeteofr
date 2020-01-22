@@ -18,7 +18,12 @@ class Fetcher:
     """
 
     def __init__(self, username=None, password=None, credentials_file_path=None):
+        """ credentials_file_path is priorily used over username/password.
+        """
+
         if credentials_file_path is None:
+            if (username is None) or (password is None):
+                raise AttributeError(f"both username and password should be given.")
             self.username = username
             self.password = password
         else:
