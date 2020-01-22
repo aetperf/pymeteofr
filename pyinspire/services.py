@@ -1,4 +1,4 @@
-"""Services module.
+""" Services module.
 """
 
 import json
@@ -72,6 +72,8 @@ class Fetcher:
 
     def set_poi(self, lon, lat):
         """ Set a point of interest from coords.
+
+            Note: coords are expressed in WGS84 (EPSG:4326) CRS.
         """
 
         if (not isinstance(lon, float)) or (not isinstance(lat, float)):
@@ -80,6 +82,8 @@ class Fetcher:
 
     def set_bboxoi(self, lon_min, lon_max, lat_min, mat_max):
         """ Set a bounding box of interest from corners coords.
+
+            Note: coords are expressed in WGS84 (EPSG:4326) CRS.
         """
 
         if (
