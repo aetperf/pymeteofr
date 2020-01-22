@@ -1,10 +1,12 @@
 """ Services module.
 """
 
-import json
+from json import load
 import xml.etree.ElementTree as et
+from datetime import datetime, timedelta
 
 import requests
+import numpy as np
 
 
 class Fetcher:
@@ -39,7 +41,7 @@ class Fetcher:
         """ Loads username and password from a json file.
         """
         with open("inspire_credentials.json") as json_file:
-            creds = json.load(json_file)
+            creds = load(json_file)
         credentials = {}
         credentials["username"] = creds["username"]
         credentials["password"] = creds["password"]
@@ -76,14 +78,12 @@ class Fetcher:
         LAT_MIN = 38.0
         LAT_MAX = 53.0
         if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
-            raise AttributeError(
-                f"point ({lon}, {lat}) is outside the model domain"
-            )
+            raise AttributeError(f"point ({lon}, {lat}) is outside the model domain")
 
     def set_poi(self, lon, lat):
         """ Set a point of interest from coords.
 
-            Note: coords are expressed in WGS84 (EPSG:4326) CRS.
+            Note : coords are expressed in WGS84 (EPSG:4326) CRS.
         """
 
         if (not isinstance(lon, float)) or (not isinstance(lat, float)):
@@ -94,7 +94,7 @@ class Fetcher:
     def set_bboxoi(self, lon_min, lon_max, lat_min, mat_max):
         """ Set a bounding box of interest from corners coords.
 
-            Note: coords are expressed in WGS84 (EPSG:4326) CRS.
+            Note : coords are expressed in WGS84 (EPSG:4326) CRS.
         """
 
         if (
@@ -113,3 +113,19 @@ class Fetcher:
             "lon_max": lon_max,
             "lat_max": lat_max,
         }
+
+    def get_latest_run_time(self, delay=4):
+        """ Runs are updated at 0am, 3am, 6am, 0pm, 6pm UTC.
+
+            Note :that the delay must be adjusted.
+        """
+        utc_now = datetime.utcnow()
+        candidate = datetime(
+            utc_now.year, utc_now.month, utc_now.day, utc_now.hour
+        ) - timedelta(hours=delay)
+        run_time = datetime(candidate.year, candidate.month, candidate.day)
+        for hour in np.flip(np.sort([3, 6, 12, 18])):
+            if candidate.hour >= hour:
+                run_time += timedelta(hours=int(hour))
+                break
+        return run_time.isoformat()
