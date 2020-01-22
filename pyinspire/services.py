@@ -69,3 +69,28 @@ class Fetcher:
         xmlData = r.content.decode("utf-8")
         root = et.fromstring(xmlData)
         self.token = root.text
+
+    def set_poi(self, lon, lat):
+        """ Set a point of interest from coords.
+        """
+
+        if (not isinstance(lon, float)) or (not isinstance(lat, float)):
+            raise TypeError("lon and lat coordinates should be floats")
+        self.poi = {"lon": lon, "lat": lat}
+
+    def set_bboxoi(self, lon_min, lon_max, lat_min, mat_max):
+        """ Set a bounding box of interest from corners coords.
+        """
+
+        if (
+            (not isinstance(lon_min, float))
+            or (not isinstance(lon_max, float) or not isinstance(lat_min, float))
+            or (not isinstance(lat_max, float))
+        ):
+            raise TypeError("lon and lat coordinates should be floats")
+        self.bbox = {
+            "lon_min": lon_min,
+            "lat_min": lat_min,
+            "lon_max": lon_max,
+            "lat_max": lat_max,
+        }
