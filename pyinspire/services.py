@@ -23,7 +23,7 @@ class Fetcher:
             self._username = username
             self._password = password
         else:
-            credentials = self.load_json_credentials(credentials_file_path)
+            credentials = self._load_json_credentials(credentials_file_path)
             self._username = credentials["username"]
             self._password = credentials["password"]
 
@@ -35,7 +35,7 @@ class Fetcher:
         else:
             self.token = token
 
-    def load_json_credentials(self, file_path):
+    def _load_json_credentials(self, file_path):
         """ Loads username and password from a json file.
         """
         with open("inspire_credentials.json") as json_file:
@@ -70,6 +70,16 @@ class Fetcher:
         root = et.fromstring(xmlData)
         self.token = root.text
 
+    def _check_coords_in_domain(self, lon, lat):
+        LON_MIN = -8.0
+        LON_MAX = 12.0
+        LAT_MIN = 38.0
+        LAT_MAX = 53.0
+        if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
+            raise AttributeError(
+                f"point ({lon}, {lat}) is outside the model domain"
+            )
+
     def set_poi(self, lon, lat):
         """ Set a point of interest from coords.
 
@@ -78,6 +88,7 @@ class Fetcher:
 
         if (not isinstance(lon, float)) or (not isinstance(lat, float)):
             raise TypeError("lon and lat coordinates should be floats")
+        self._check_coords_in_domain(lon, lat)
         self.poi = {"lon": lon, "lat": lat}
 
     def set_bboxoi(self, lon_min, lon_max, lat_min, mat_max):
@@ -92,6 +103,10 @@ class Fetcher:
             or (not isinstance(lat_max, float))
         ):
             raise TypeError("lon and lat coordinates should be floats")
+        if (lon_min < lon_max) or (lat_min < lat_max):
+            raise AttributeError("min coord should be smaller than max")
+        self._check_coords_in_domain(lon_min, lat_min)
+        self._check_coords_in_domain(lon_max, lat_max)
         self.bbox = {
             "lon_min": lon_min,
             "lat_min": lat_min,
