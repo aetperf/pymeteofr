@@ -39,16 +39,29 @@ class Fetcher:
         if (not isinstance(self._username, str)) or (not isinstance(self._password, str)):
             raise TypeError("username and password should be strings")
 
+        self.token = None
+
     def fetch_token(self):
         """ Fetch the service token from Meteo-France.
         """
+
         url = (
             "https://geoservices.meteofrance.fr/"
             + f"services/GetAPIKey?username={self._username}&password={self._password}"
         )
-        r = requests.get(url)
+
+        try:
+            r = requests.get(url)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print("Http Error:", e)
+        except requests.exceptions.ConnectionError as e:
+            print("Error Connecting:", e)
+        except requests.exceptions.Timeout as e:
+            print("Timeout Error:", e)
+        except requests.exceptions.RequestException as e:
+            print("OOOOOps: Something is wrong with the request", e)
+
         xmlData = r.content.decode("utf-8")
         root = et.fromstring(xmlData)
-        token = root.text
-
-        return token
+        self.token = root.text
