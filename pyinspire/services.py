@@ -7,17 +7,6 @@ import xml.etree.ElementTree as et
 import requests
 
 
-def load_json_credentials(file_path):
-    """ Loads username and password from a json file.
-    """
-    with open("inspire_credentials.json") as json_file:
-        creds = json.load(json_file)
-    credentials = {}
-    credentials["username"] = creds["username"]
-    credentials["password"] = creds["password"]
-    return credentials
-
-
 class Fetcher:
     """ Fetching weather data from Inspire web services (Meteo-France).
     """
@@ -34,7 +23,7 @@ class Fetcher:
             self._username = username
             self._password = password
         else:
-            credentials = load_json_credentials(credentials_file_path)
+            credentials = self.load_json_credentials(credentials_file_path)
             self._username = credentials["username"]
             self._password = credentials["password"]
 
@@ -45,6 +34,16 @@ class Fetcher:
             self.fetch_token()
         else:
             self.token = token
+
+    def load_json_credentials(self, file_path):
+        """ Loads username and password from a json file.
+        """
+        with open("inspire_credentials.json") as json_file:
+            creds = json.load(json_file)
+        credentials = {}
+        credentials["username"] = creds["username"]
+        credentials["password"] = creds["password"]
+        return credentials
 
     def fetch_token(self):
         """ Fetch the service token from Meteo-France.
