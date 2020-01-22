@@ -1,5 +1,10 @@
-"""Main module."""
+"""Services module.
+"""
+
 import json
+import xml.etree.ElementTree as et
+
+import requests
 
 
 def load_json_credentials(file_path):
@@ -18,15 +23,32 @@ class Fetcher:
     """
 
     def __init__(self, username=None, password=None, credentials_file_path=None):
-        """ credentials_file_path is priorily used over username/password.
+        """ Note : credentials_file_path is priorily used over username/password.
         """
 
         if credentials_file_path is None:
             if (username is None) or (password is None):
                 raise AttributeError(f"both username and password should be given.")
-            self.username = username
-            self.password = password
+            self._username = username
+            self._password = password
         else:
             credentials = load_json_credentials(credentials_file_path)
-            self.username = credentials["username"]
-            self.password = credentials["password"]
+            self._username = credentials["username"]
+            self._password = credentials["password"]
+
+        if (not isinstance(self._username, str)) or (not isinstance(self._password, str)):
+            raise TypeError("username and password should be strings")
+
+    def fetch_token(self):
+        """ Fetch the service token from Meteo-France.
+        """
+        url = (
+            "https://geoservices.meteofrance.fr/"
+            + f"services/GetAPIKey?username={self._username}&password={self._password}"
+        )
+        r = requests.get(url)
+        xmlData = r.content.decode("utf-8")
+        root = et.fromstring(xmlData)
+        token = root.text
+
+        return token
