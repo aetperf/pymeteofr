@@ -7,9 +7,10 @@ def load_json_credentials(file_path):
 	"""
     with open("inspire_credentials.json") as json_file:
         creds = json.load(json_file)
-    assert "username" in creds
-    assert "password" in creds
-    return creds
+    credentials = {}
+    credentials["username"] = creds["username"]
+    credentials["password"] = creds["password"]
+    return credentials
 
 
 class Fetcher:
