@@ -22,7 +22,9 @@ class Fetcher:
     """ Fetching weather data from Inspire web services (Meteo-France).
     """
 
-    def __init__(self, username=None, password=None, credentials_file_path=None):
+    def __init__(
+        self, username=None, password=None, credentials_file_path=None, token=None
+    ):
         """ Note : credentials_file_path is priorily used over username/password.
         """
 
@@ -39,7 +41,10 @@ class Fetcher:
         if (not isinstance(self._username, str)) or (not isinstance(self._password, str)):
             raise TypeError("username and password should be strings")
 
-        self.token = None
+        if token is None:
+            self.fetch_token()
+        else:
+            self.token = token
 
     def fetch_token(self):
         """ Fetch the service token from Meteo-France.
