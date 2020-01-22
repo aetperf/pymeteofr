@@ -90,8 +90,10 @@ class Fetcher:
             raise TypeError("lon and lat coordinates should be floats")
         self._check_coords_in_domain(lon, lat)
         self.poi = {"lon": lon, "lat": lat}
+        margin = 0.02
+        self.set_bboxoi(lon - margin, lon + margin, lat - margin, lat + margin)
 
-    def set_bboxoi(self, lon_min, lon_max, lat_min, mat_max):
+    def set_bboxoi(self, lon_min, lon_max, lat_min, lat_max):
         """ Set a bounding box of interest from corners coords.
 
             Note : coords are expressed in WGS84 (EPSG:4326) CRS.
@@ -103,7 +105,7 @@ class Fetcher:
             or (not isinstance(lat_max, float))
         ):
             raise TypeError("lon and lat coordinates should be floats")
-        if (lon_min < lon_max) or (lat_min < lat_max):
+        if (lon_min >= lon_max) or (lat_min >= lat_max):
             raise AttributeError("min coord should be smaller than max")
         self._check_coords_in_domain(lon_min, lat_min)
         self._check_coords_in_domain(lon_max, lat_max)
@@ -128,4 +130,15 @@ class Fetcher:
             if candidate.hour >= hour:
                 run_time += timedelta(hours=int(hour))
                 break
-        return run_time.isoformat()
+        return run_time
+
+    def create_url_arome_001(self, run_time, field="temperature", hours=12):
+
+        run_time_iso = run_time.isoformat()
+        end_time = run_time + timedelta(hours=hours)
+        end_time_iso = end_time.isoformat()
+
+        if field == "temperature":
+            url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___{run_time}Z&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
+
+        return url
