@@ -116,22 +116,6 @@ class Fetcher:
             "lat_max": lat_max,
         }
 
-    def get_latest_run_time(self, delay=4):
-        """ Runs are updated at 0am, 3am, 6am, 0pm, 6pm UTC.
-
-            Note :that the delay must be adjusted.
-        """
-        utc_now = datetime.utcnow()
-        candidate = datetime(
-            utc_now.year, utc_now.month, utc_now.day, utc_now.hour
-        ) - timedelta(hours=delay)
-        run_time = datetime(candidate.year, candidate.month, candidate.day)
-        for hour in np.flip(np.sort([3, 6, 12, 18])):
-            if candidate.hour >= hour:
-                run_time += timedelta(hours=int(hour))
-                break
-        return run_time
-
     def create_url_arome_001(self, run_time, field="temperature", hours=12):
 
         run_time_iso = run_time.isoformat()
