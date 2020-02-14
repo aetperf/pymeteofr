@@ -1,26 +1,23 @@
 =========
-PyInspire
+PyMeteoFr
 =========
 
-
-.. image:: https://img.shields.io/pypi/v/pyinspire.svg
-        :target: https://pypi.python.org/pypi/pyinspire
-
-.. image:: https://img.shields.io/travis/djfrancesco/pyinspire.svg
-        :target: https://travis-ci.org/djfrancesco/pyinspire
-
-.. image:: https://readthedocs.org/projects/pyinspire/badge/?version=latest
-        :target: https://pyinspire.readthedocs.io/en/latest/?badge=latest
+..
+.. image:: https://img.shields.io/pypi/v/pymeteofr.svg
+        :target: https://pypi.python.org/pypi/pymeteofr
+..
+.. image:: https://img.shields.io/travis/djfrancesco/pymeteofr.svg
+        :target: https://travis-ci.org/djfrancesco/pymeteofr
+..
+.. image:: https://readthedocs.org/projects/pymeteofr/badge/?version=latest
+        :target: https://pymeteofr.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 
-
-
-Fetching weather data from Inspire web services (Meteo-France)
-
+Python wrapper for the meteo-france web services.
 
 * Free software: MIT license
-* Documentation: https://pyinspire.readthedocs.io.
+* Documentation: https://pymeteofr.readthedocs.io.
 
 
 Features
@@ -30,8 +27,3 @@ Features
 
 Credits
 -------
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
