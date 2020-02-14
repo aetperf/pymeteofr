@@ -13,49 +13,30 @@ class Fetcher:
     """ Fetching weather data from Inspire web services (Meteo-France).
     """
 
-    def __init__(
-        self, username=None, password=None, credentials_file_path=None, token=None
-    ):
-        """ Note : credentials_file_path is priorily used over username/password.
+    def __init__(self, token=None):
+
+        self.token = None
+        if token is not None:
+            self.token = token
+
+        self._WCS_version = "2.0.1"
+
+    def fetch_token(self, username=None, password=None, credentials_file_path=None):
+        """ Fetch the service token from Meteo-France.
         """
 
         if credentials_file_path is None:
             if (username is None) or (password is None):
                 raise AttributeError(f"both username and password should be given.")
-            self._username = username
-            self._password = password
         else:
-            credentials = self._load_json_credentials(credentials_file_path)
-            self._username = credentials["username"]
-            self._password = credentials["password"]
+            username, password = self._load_json_credentials(credentials_file_path)
 
-        if (not isinstance(self._username, str)) or (not isinstance(self._password, str)):
+        if (not isinstance(username, str)) or (not isinstance(password, str)):
             raise TypeError("username and password should be strings")
-
-        if token is None:
-            self.fetch_token()
-        else:
-            self.token = token
-
-        self._WCS_version = '2.0.1'
-
-    def _load_json_credentials(self, file_path):
-        """ Loads username and password from a json file.
-        """
-        with open(file_path) as json_file:
-            creds = load(json_file)
-        credentials = {}
-        credentials["username"] = creds["username"]
-        credentials["password"] = creds["password"]
-        return credentials
-
-    def fetch_token(self):
-        """ Fetch the service token from Meteo-France.
-        """
 
         url = (
             "https://geoservices.meteofrance.fr/"
-            + f"services/GetAPIKey?username={self._username}&password={self._password}"
+            + f"services/GetAPIKey?username={username}&password={password}"
         )
 
         try:
@@ -73,6 +54,14 @@ class Fetcher:
         xmlData = r.content.decode("utf-8")
         root = et.fromstring(xmlData)
         self.token = root.text
+
+    def _load_json_credentials(self, file_path):
+        """ Loads username and password from a json file.
+        """
+        with open(file_path) as json_file:
+            creds = load(json_file)
+        credentials = {}
+        return creds["username"], creds["password"]
 
     # def _check_coords_in_domain(self, lon, lat):
     #     LON_MIN = -8.0
@@ -118,7 +107,7 @@ class Fetcher:
     #         "lat_max": int(np.ceil(lat_max)),
     #     }
 
-    def create_url_arome_001(self,  field="temperature", hours=2):
+    def create_url_arome_001(self, field="temperature", hours=2):
 
         # run_time_iso = run_time.isoformat()
         end_time = datetime.utcnow() + timedelta(hours=hours)
