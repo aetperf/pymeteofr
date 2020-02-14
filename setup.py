@@ -10,7 +10,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["requests", "numpy", "pandas", "rasterio"]
+requirements = ["requests", "numpy", "pandas", "rasterio", "scipy"]
 
 setup_requirements = []
 
@@ -31,18 +31,18 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    description="Fetching weather data from Inspire web services (Meteo-France)",
+    description="Python wrapper for the meteo-france web services.",
     install_requires=requirements,
     license="MIT license",
     long_description=readme + "\n\n" + history,
     include_package_data=True,
-    keywords="pyinspire",
-    name="pyinspire",
-    packages=find_packages(include=["pyinspire", "pyinspire.*"]),
+    keywords="pymeteofr",
+    name="pymeteofr",
+    packages=find_packages(include=["pymeteofr", "pymeteofr.*"]),
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    url="https://github.com/djfrancesco/pyinspire",
+    url="https://github.com/djfrancesco/pymeteofr",
     version="0.1.0",
     zip_safe=False,
 )

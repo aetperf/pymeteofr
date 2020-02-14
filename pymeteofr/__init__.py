@@ -1,4 +1,4 @@
-"""Top-level package for PyInspire."""
+"""Top-level package for PyMeteoFr."""
 
 __author__ = """Francois Pacull"""
 __email__ = "francois.pacull@architecture-performance.fr"
