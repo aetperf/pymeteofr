@@ -37,6 +37,8 @@ class Fetcher:
         else:
             self.token = token
 
+        self._WCS_version = '2.0.1'
+
     def _load_json_credentials(self, file_path):
         """ Loads username and password from a json file.
         """
@@ -110,19 +112,19 @@ class Fetcher:
         self._check_coords_in_domain(lon_min, lat_min)
         self._check_coords_in_domain(lon_max, lat_max)
         self.bbox = {
-            "lon_min": lon_min,
-            "lat_min": lat_min,
-            "lon_max": lon_max,
-            "lat_max": lat_max,
+            "lon_min": int(np.floor(lon_min)),
+            "lat_min": int(np.floor(lat_min)),
+            "lon_max": int(np.ceil(lon_max)),
+            "lat_max": int(np.ceil(lat_max)),
         }
 
-    def create_url_arome_001(self, run_time, field="temperature", hours=12):
+    def create_url_arome_001(self,  field="temperature", hours=2):
 
-        run_time_iso = run_time.isoformat()
-        end_time = run_time + timedelta(hours=hours)
+        # run_time_iso = run_time.isoformat()
+        end_time = datetime.utcnow() + timedelta(hours=hours)
         end_time_iso = end_time.isoformat()
 
         if field == "temperature":
-            url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___{run_time}Z&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
+            url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND__&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
 
         return url
