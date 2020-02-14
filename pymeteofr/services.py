@@ -42,7 +42,7 @@ class Fetcher:
     def _load_json_credentials(self, file_path):
         """ Loads username and password from a json file.
         """
-        with open("inspire_credentials.json") as json_file:
+        with open(file_path) as json_file:
             creds = load(json_file)
         credentials = {}
         credentials["username"] = creds["username"]
@@ -68,55 +68,55 @@ class Fetcher:
         except requests.exceptions.Timeout as e:
             print("Timeout Error:", e)
         except requests.exceptions.RequestException as e:
-            print("OOOOOps: Something is wrong with the request", e)
+            print("Something is wrong with the request", e)
 
         xmlData = r.content.decode("utf-8")
         root = et.fromstring(xmlData)
         self.token = root.text
 
-    def _check_coords_in_domain(self, lon, lat):
-        LON_MIN = -8.0
-        LON_MAX = 12.0
-        LAT_MIN = 38.0
-        LAT_MAX = 53.0
-        if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
-            raise AttributeError(f"point ({lon}, {lat}) is outside the model domain")
+    # def _check_coords_in_domain(self, lon, lat):
+    #     LON_MIN = -8.0
+    #     LON_MAX = 12.0
+    #     LAT_MIN = 38.0
+    #     LAT_MAX = 53.0
+    #     if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
+    #         raise AttributeError(f"point ({lon}, {lat}) is outside the model domain")
 
-    def set_poi(self, lon, lat):
-        """ Set a point of interest from coords.
+    # def set_poi(self, lon, lat):
+    #     """ Set a point of interest from coords.
 
-            Note : coords are expressed in WGS84 (EPSG:4326) CRS.
-        """
+    #         Note : coords are expressed in WGS84 (EPSG:4326) CRS.
+    #     """
 
-        if (not isinstance(lon, float)) or (not isinstance(lat, float)):
-            raise TypeError("lon and lat coordinates should be floats")
-        self._check_coords_in_domain(lon, lat)
-        self.poi = {"lon": lon, "lat": lat}
-        margin = 0.02
-        self.set_bboxoi(lon - margin, lon + margin, lat - margin, lat + margin)
+    #     if (not isinstance(lon, float)) or (not isinstance(lat, float)):
+    #         raise TypeError("lon and lat coordinates should be floats")
+    #     self._check_coords_in_domain(lon, lat)
+    #     self.poi = {"lon": lon, "lat": lat}
+    #     margin = 0.02
+    #     self.set_bboxoi(lon - margin, lon + margin, lat - margin, lat + margin)
 
-    def set_bboxoi(self, lon_min, lon_max, lat_min, lat_max):
-        """ Set a bounding box of interest from corners coords.
+    # def set_bboxoi(self, lon_min, lon_max, lat_min, lat_max):
+    #     """ Set a bounding box of interest from corners coords.
 
-            Note : coords are expressed in WGS84 (EPSG:4326) CRS.
-        """
+    #         Note : coords are expressed in WGS84 (EPSG:4326) CRS.
+    #     """
 
-        if (
-            (not isinstance(lon_min, float))
-            or (not isinstance(lon_max, float) or not isinstance(lat_min, float))
-            or (not isinstance(lat_max, float))
-        ):
-            raise TypeError("lon and lat coordinates should be floats")
-        if (lon_min >= lon_max) or (lat_min >= lat_max):
-            raise AttributeError("min coord should be smaller than max")
-        self._check_coords_in_domain(lon_min, lat_min)
-        self._check_coords_in_domain(lon_max, lat_max)
-        self.bbox = {
-            "lon_min": int(np.floor(lon_min)),
-            "lat_min": int(np.floor(lat_min)),
-            "lon_max": int(np.ceil(lon_max)),
-            "lat_max": int(np.ceil(lat_max)),
-        }
+    #     if (
+    #         (not isinstance(lon_min, float))
+    #         or (not isinstance(lon_max, float) or not isinstance(lat_min, float))
+    #         or (not isinstance(lat_max, float))
+    #     ):
+    #         raise TypeError("lon and lat coordinates should be floats")
+    #     if (lon_min >= lon_max) or (lat_min >= lat_max):
+    #         raise AttributeError("min coord should be smaller than max")
+    #     self._check_coords_in_domain(lon_min, lat_min)
+    #     self._check_coords_in_domain(lon_max, lat_max)
+    #     self.bbox = {
+    #         "lon_min": int(np.floor(lon_min)),
+    #         "lat_min": int(np.floor(lat_min)),
+    #         "lon_max": int(np.ceil(lon_max)),
+    #         "lat_max": int(np.ceil(lat_max)),
+    #     }
 
     def create_url_arome_001(self,  field="temperature", hours=2):
 
