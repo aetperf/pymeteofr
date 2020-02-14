@@ -10,7 +10,15 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = ["requests", "matplotlib", "numpy", "pandas", "rasterio", "scipy"]
+requirements = [
+    "requests",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "xmltodict",
+    "rasterio",
+    "scipy",
+]
 
 setup_requirements = []
 
