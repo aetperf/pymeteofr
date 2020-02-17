@@ -64,6 +64,18 @@ class Fetcher:
         credentials = {}
         return creds["username"], creds["password"]
 
+    def select_service(
+        self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01,
+    ):
+        dataset = dataset.lower()
+        area = area.lower()
+        service_type = "wcs"
+
+        self._url = ArgumentChecker(
+            dataset=dataset, area=area, accuracy=accuracy, service_type=service_type,
+        ).get_url()
+        self._url = self._url.replace("VOTRE_CLE", self.token)
+
     # def _check_coords_in_domain(self, lon, lat):
     #     LON_MIN = -8.0
     #     LON_MAX = 12.0
@@ -177,7 +189,7 @@ class ArgumentChecker:
         if accuracy > 0.0:
             self.choice = self.choice[self.choice.accuracy == accuracy]
 
-    def get_url(self):
+    def get_url(self) -> str:
 
         if len(self.choice) == 0:
             raise ValueError("No service matching the criteria")
