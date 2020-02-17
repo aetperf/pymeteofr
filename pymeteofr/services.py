@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 import requests
 import numpy as np
+import pandas as pd
 
 
 class Fetcher:
@@ -117,3 +118,71 @@ class Fetcher:
             url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND__&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
 
         return url
+
+
+class ArgumentChecker:
+
+    OPTIONS = [
+        {
+            "dataset": "arpege",
+            "area": "world",
+            "accuracy": 0.5,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-GLOBAL-ARPEGE-05-GLOBE-WCS?",
+            "service_type": "wcs",
+        },
+        {
+            "dataset": "arpege",
+            "area": "europe",
+            "accuracy": 0.1,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-GLOBAL-ARPEGE-01-EUROPE-WCS?",
+            "service_type": "wcs",
+        },
+        {
+            "dataset": "arome",
+            "area": "france",
+            "accuracy": 0.025,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-0025-FRANCE-WCS?",
+            "service_type": "wcs",
+        },
+        {
+            "dataset": "arome",
+            "area": "france",
+            "accuracy": 0.01,
+            "url_base": "https://geoservices.mete-ofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?",
+            "service_type": "wcs",
+        },
+    ]
+
+    OPTIONS_DF = pd.DataFrame(OPTIONS)
+
+    def __init__(
+        self,
+        dataset: str = "",
+        area: str = "",
+        accuracy: float = 0.0,
+        service_type: str = "wcs",
+    ):
+
+        self.choice = self.OPTIONS_DF.copy(deep=True)
+
+        if len(service_type) > 0:
+            self.choice = self.choice[self.choice.service_type == service_type]
+
+        if len(dataset) > 0:
+            self.choice = self.choice[self.choice.dataset == dataset]
+
+        if len(area) > 0:
+            self.choice = self.choice[self.choice.area == area]
+
+        if accuracy > 0.0:
+            self.choice = self.choice[self.choice.accuracy == accuracy]
+
+    def get_url(self):
+
+        if len(self.choice) == 0:
+            raise ValueError("No service matching the criteria")
+        elif len(self.choice) > 1:
+            print(self.choice[["dataset", "area", "accuracy", "service_type"]])
+            raise ValueError("Several services match the criteria")
+
+        return self.choice["url_base"].values[0]
