@@ -14,7 +14,7 @@ PyMeteoFr
         :alt: Documentation Status
 
 
-Python wrapper for the meteo-france web services.
+Python wrapper of the meteo-france web services (only the OGC Web Coverage Service (WCS)).
 
 * Free software: MIT license
 ..
