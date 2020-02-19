@@ -113,7 +113,7 @@ class Fetcher:
     def list_titles(self):
         return list(np.sort(self._capa_1H.Title.unique()))
 
-    def select_titles(
+    def set_title(
         self, title: str = "Temperature at specified height level above ground"
     ):
 
@@ -122,18 +122,7 @@ class Fetcher:
         else:
             raise ValueError(f"title '{title}' not found")
 
-    def list_available_run_times(self):
-        run_times = list(
-            np.sort(
-                self._capa_1H.loc[self._capa_1H.Title == self.title, "run_time"].values
-            )
-        )
-        run_times = np.datetime_as_string(run_times, timezone="UTC")
-        run_times = [dt.split(":")[0] for dt in run_times]
-        return run_times
-
-    def select_coverage_id(self, run_time: str = "latest"):
-
+    def _get_coverage_id(self, run_time: str = "latest"):
         if run_time == "latest":
             self.CoverageId = (
                 self._capa_1H.loc[self._capa_1H.Title == self.title]
@@ -148,10 +137,36 @@ class Fetcher:
                 (self._capa_1H.Title == self.title) & (self._capa_1H.run_time == run_time)
             ].CoverageId.values[0]
 
+    def select_service(
+        self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01
+    ):
+        self._build_base_url(dataset, area, accuracy)
+        self._get_capabilities()
 
+    def list_available_run_times(self, title=""):
 
+        if len(title) > 0:
+            self.set_title(title)
 
+        run_times = list(
+            np.sort(
+                self._capa_1H.loc[self._capa_1H.Title == self.title, "run_time"].values
+            )
+        )
+        run_times = np.datetime_as_string(run_times, timezone="UTC")
+        run_times = [dt.split(":")[0] for dt in run_times]
+        return run_times
 
+    def select_coverage_id(
+        self,
+        title: str = "Temperature at specified height level above ground",
+        run_time: str = "latest",
+    ):
+        self.set_title(title)
+        self._get_coverage_id(run_time)
+
+    def update(self):
+        self._get_capabilities()
 
     # def _check_coords_in_domain(self, lon, lat):
     #     LON_MIN = -8.0
