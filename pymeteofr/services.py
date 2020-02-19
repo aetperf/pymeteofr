@@ -2,7 +2,7 @@
 """
 
 from json import load
-import xml.etree.ElementTree as et
+import xmltodict
 from datetime import datetime, timedelta
 
 import requests
@@ -53,8 +53,10 @@ class Fetcher:
             print("Something is wrong with the request", e)
 
         xmlData = r.content.decode("utf-8")
-        root = et.fromstring(xmlData)
-        self.token = root.text
+        d = xmltodict.parse(xmlData, process_namespaces=True)
+        self.token = d["http://ws.apache.org/ns/synapse:Token"]
+        assert self.token[:2] == "__"
+        assert self.token[-2:] == "__"
 
     def _load_json_credentials(self, file_path):
         """ Loads username and password from a json file.
@@ -78,6 +80,8 @@ class Fetcher:
 
         # add token to base url
         self._url = self._url.replace("VOTRE_CLE", self.token)
+
+    # def get_capabilities(self):
 
     # def _check_coords_in_domain(self, lon, lat):
     #     LON_MIN = -8.0
