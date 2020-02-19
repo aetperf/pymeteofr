@@ -132,6 +132,27 @@ class Fetcher:
         run_times = [dt.split(":")[0] for dt in run_times]
         return run_times
 
+    def select_coverage_id(self, run_time: str = "latest"):
+
+        if run_time == "latest":
+            self.CoverageId = (
+                self._capa_1H.loc[self._capa_1H.Title == self.title]
+                .sort_values(by="run_time", ascending=False)
+                .iloc[0]
+                .CoverageId
+            )
+        else:
+            if run_time not in self.list_available_run_times():
+                raise ValueError(f"run time {run_time} not found in available run times")
+            self.CoverageId = self._capa_1H.loc[
+                (self._capa_1H.Title == self.title) & (self._capa_1H.run_time == run_time)
+            ].CoverageId.values[0]
+
+
+
+
+
+
     # def _check_coords_in_domain(self, lon, lat):
     #     LON_MIN = -8.0
     #     LON_MAX = 12.0
