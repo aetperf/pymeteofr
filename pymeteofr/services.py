@@ -64,16 +64,19 @@ class Fetcher:
         credentials = {}
         return creds["username"], creds["password"]
 
-    def select_service(
+    def _build_base_url(
         self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01,
     ):
         dataset = dataset.lower()
         area = area.lower()
         service_type = "wcs"
 
-        self._url = ArgumentChecker(
+        # checks if the requested service is found
+        self._url = ServiceOptionsChecker(
             dataset=dataset, area=area, accuracy=accuracy, service_type=service_type,
-        ).get_url()
+        ).get_url_base()
+
+        # add token to base url
         self._url = self._url.replace("VOTRE_CLE", self.token)
 
     # def _check_coords_in_domain(self, lon, lat):
@@ -120,19 +123,21 @@ class Fetcher:
     #         "lat_max": int(np.ceil(lat_max)),
     #     }
 
-    def create_url_arome_001(self, field="temperature", hours=2):
+    # def create_url_arome_001(self, field="temperature", hours=2):
 
-        # run_time_iso = run_time.isoformat()
-        end_time = datetime.utcnow() + timedelta(hours=hours)
-        end_time_iso = end_time.isoformat()
+    #     # run_time_iso = run_time.isoformat()
+    #     end_time = datetime.utcnow() + timedelta(hours=hours)
+    #     end_time_iso = end_time.isoformat()
 
-        if field == "temperature":
-            url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND__&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
+    #     if field == "temperature":
+    #         url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND__&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
 
-        return url
+    #     return url
 
 
-class ArgumentChecker:
+class ServiceOptionsChecker:
+    """ Check the different WCS options, e.g. dataset, area, accuracy.
+    """
 
     OPTIONS = [
         {
@@ -189,7 +194,7 @@ class ArgumentChecker:
         if accuracy > 0.0:
             self.choice = self.choice[self.choice.accuracy == accuracy]
 
-    def get_url(self) -> str:
+    def get_url_base(self) -> str:
 
         if len(self.choice) == 0:
             raise ValueError("No service matching the criteria")
