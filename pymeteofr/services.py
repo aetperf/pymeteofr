@@ -74,14 +74,63 @@ class Fetcher:
         service_type = "wcs"
 
         # checks if the requested service is found
-        self._url = ServiceOptionsChecker(
+        self._url_base = ServiceOptionsChecker(
             dataset=dataset, area=area, accuracy=accuracy, service_type=service_type,
         ).get_url_base()
 
         # add token to base url
-        self._url = self._url.replace("VOTRE_CLE", self.token)
+        self._url_base = self._url_base.replace("VOTRE_CLE", self.token)
 
-    # def get_capabilities(self):
+    def _get_capabilities(self):
+
+        url = (
+            self._url_base
+            + f"SERVICE=WCS&REQUEST=GetCapabilities&version={self._WCS_version}&Language=eng"
+        )
+        r = requests.get(url)
+        xmlData = r.content.decode("utf-8")
+        d = xmltodict.parse(xmlData, process_namespaces=True)
+        root = d[list(d.keys())[0]]
+        capa = pd.DataFrame(
+            root["http://www.opengis.net/wcs/2.0:Contents"][
+                "http://www.opengis.net/wcs/2.0:CoverageSummary"
+            ]
+        )
+        capa.columns = [col.split(":")[-1] for col in capa.columns]
+        capa["run_time_suffix"] = capa.CoverageId.map(
+            lambda s: s.split("___")[-1].split("Z")[-1].strip()
+        )
+
+        self._capa_1H = capa[capa.run_time_suffix == ""].copy(deep=True)
+        self._capa_1H.drop("run_time_suffix", axis=1, inplace=True)
+        self._capa_1H["run_time"] = self._capa_1H.CoverageId.map(
+            lambda s: s.split("___")[-1].split("Z")[0].strip()
+        )
+        self._capa_1H.run_time = self._capa_1H.run_time.map(
+            lambda s: datetime.strptime(s, "%Y-%m-%dT%H.%M.%S")
+        )
+
+    def list_titles(self):
+        return list(np.sort(self._capa_1H.Title.unique()))
+
+    def select_titles(
+        self, title: str = "Temperature at specified height level above ground"
+    ):
+
+        if title in list(np.sort(self._capa_1H.Title.unique())):
+            self.title = title
+        else:
+            raise ValueError(f"title '{title}' not found")
+
+    def list_available_run_times(self):
+        run_times = list(
+            np.sort(
+                self._capa_1H.loc[self._capa_1H.Title == self.title, "run_time"].values
+            )
+        )
+        run_times = np.datetime_as_string(run_times, timezone="UTC")
+        run_times = [dt.split(":")[0] for dt in run_times]
+        return run_times
 
     # def _check_coords_in_domain(self, lon, lat):
     #     LON_MIN = -8.0
@@ -169,7 +218,7 @@ class ServiceOptionsChecker:
             "dataset": "arome",
             "area": "france",
             "accuracy": 0.01,
-            "url_base": "https://geoservices.mete-ofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?",
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?",
             "service_type": "wcs",
         },
     ]
