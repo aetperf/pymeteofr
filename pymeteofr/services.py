@@ -8,7 +8,7 @@ Notes
 - we only select predicted weather fields that are available on a 1H-based 
 frequency
 - all times are UTC
-
+- coords are expressed in WGS84 (EPSG:4326) CRS
 """
 from json import load
 from datetime import datetime, timedelta
@@ -226,22 +226,15 @@ class Fetcher:
                 (self._capa_1H.Title == self.title) & (self._capa_1H.run_time == run_time)
             ].CoverageId.values[0]
 
+    # def create_next_24_hours_dts():
+
     # def _check_coords_in_domain(self, lon, lat):
-    #     LON_MIN = -8.0
-    #     LON_MAX = 12.0
-    #     LAT_MIN = 38.0
-    #     LAT_MAX = 53.0
     #     if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
     #         raise AttributeError(f"point ({lon}, {lat}) is outside the model domain")
 
-    # def set_poi(self, lon, lat):
+    # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
-
-    #         Note : coords are expressed in WGS84 (EPSG:4326) CRS.
     #     """
-
-    #     if (not isinstance(lon, float)) or (not isinstance(lat, float)):
-    #         raise TypeError("lon and lat coordinates should be floats")
     #     self._check_coords_in_domain(lon, lat)
     #     self.poi = {"lon": lon, "lat": lat}
     #     margin = 0.02
