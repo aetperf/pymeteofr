@@ -31,6 +31,8 @@ class Fetcher:
             self.token = token
 
         self._WCS_version = "2.0.1"  # The only supported version
+        self._url_base = ""
+        self._CoverageId = ""
 
     def fetch_token(
         self, username: str = "", password: str = "", credentials_file_path: str = ""
@@ -130,6 +132,7 @@ class Fetcher:
         """
         self.set_title(title)
         self._get_coverage_id(run_time)
+        self.run_time = self.CoverageId.split("___")[-1].replace(".", ":")
 
     def update(self) -> None:
         """ 
@@ -137,6 +140,22 @@ class Fetcher:
         i.e. latest run time.
         """
         self._get_capabilities()
+
+    def describe(self):
+        """
+        Get spatial and temporal information of the the selected CoverageId
+        """
+        describer = Describer(self._url_base, self.CoverageId, self._WCS_version)
+        describer.get_description()
+
+        # bounding box of the area covered
+        self.bbox = describer.bbox
+
+        # available time stamps
+        start = datetime.strptime(describer.beginPosition, "%Y-%m-%dT%H:%M:%SZ")
+        end = datetime.strptime(describer.endPosition, "%Y-%m-%dT%H:%M:%SZ")
+        self.dts = pd.date_range(start=start, end=end, freq="H")
+        self.dts_iso = [dt.isoformat() + "Z" for dt in self.dts]
 
     # ==========
 
@@ -263,8 +282,12 @@ class Fetcher:
 
 class Describer:
     def __init__(
-        self, url_base: str, CoverageId: str, WCS_version: str = "2.0.1"
+        self, url_base: str = "", CoverageId: str = "", WCS_version: str = "2.0.1"
     ) -> None:
+        if url_base == "":
+            raise ValueError("Please set the base url by selecting a product")
+        if CoverageId == "":
+            raise ValueError("Please set the CoverageId by selecting a field")
         self._url_base = url_base
         self._CoverageId = CoverageId
         self._WCS_version = WCS_version
@@ -277,7 +300,7 @@ class Describer:
         )
         return url
 
-    def describe_coverage(self) -> None:
+    def get_description(self) -> None:
         """
         Retrieve the information found in the result of the DescribeCoverage 
         request.
