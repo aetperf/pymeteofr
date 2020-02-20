@@ -8,6 +8,7 @@ Notes
 - we only select predicted weather fields that are available on a 1H-based 
 frequency
 - all times are UTC
+
 """
 from json import load
 from datetime import datetime, timedelta
@@ -258,6 +259,58 @@ class Fetcher:
     #         url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND__&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
 
     #     return url
+
+
+class Describer:
+    def __init__(
+        self, url_base: str, CoverageId: str, WCS_version: str = "2.0.1"
+    ) -> None:
+        self._url_base = url_base
+        self._CoverageId = CoverageId
+        self._WCS_version = WCS_version
+
+    def _build_url(self) -> str:
+        url = (
+            self._url_base
+            + f"SERVICE=WCS&version={self._WCS_version}"
+            + f"&REQUEST=DescribeCoverage&CoverageId={self._CoverageId}"
+        )
+        return url
+
+    def describe_coverage(self) -> None:
+        """
+        Retrieve the information found in the result of the DescribeCoverage 
+        request.
+        """
+        url = self._build_url()
+        r = requests.get(url)
+        xmlData = r.content.decode("utf-8")
+        d = xmltodict.parse(xmlData, process_namespaces=True)
+        description = d["http://www.opengis.net/wcs/2.0:CoverageDescriptions"][
+            "http://www.opengis.net/wcs/2.0:CoverageDescription"
+        ]["http://www.opengis.net/gml/3.2:boundedBy"][
+            "http://www.opengis.net/gml/3.2:EnvelopeWithTimePeriod"
+        ]
+        self.axisLabels = description["@axisLabels"]
+        self.uomLabels = description["@uomLabels"]
+        self.srsDimension = description["@srsDimension"]
+
+        self.lowerCorner = description["http://www.opengis.net/gml/3.2:lowerCorner"]
+        self.upperCorner = description["http://www.opengis.net/gml/3.2:upperCorner"]
+
+        self.beginPosition = description["http://www.opengis.net/gml/3.2:beginPosition"][
+            "#text"
+        ]
+        self.endPosition = description["http://www.opengis.net/gml/3.2:endPosition"][
+            "#text"
+        ]
+
+        self.lon_min = float(self.lowerCorner.split(" ")[0])
+        self.lat_min = float(self.lowerCorner.split(" ")[1])
+        self.lon_max = float(self.upperCorner.split(" ")[0])
+        self.lat_max = float(self.upperCorner.split(" ")[1])
+
+        self.bbox = (self.lon_min, self.lat_min, self.lon_max, self.lat_max)
 
 
 class ServiceOptionsChecker:
