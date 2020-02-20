@@ -1,29 +1,32 @@
-""" Services module.
-"""
+""" 
 
+service.py contains all tools concerning the wrapper of the Meteo-France web services.
+
+"""
 from json import load
-import xmltodict
 from datetime import datetime, timedelta
 
+import xmltodict
 import requests
 import numpy as np
 import pandas as pd
 
 
 class Fetcher:
-    """ Fetching weather data from Inspire web services (Meteo-France).
+    """ 
+    Main class for the web service wrapper.
     """
 
     def __init__(self, token=None):
-
         self.token = None
         if token is not None:
             self.token = token
 
-        self._WCS_version = "2.0.1"
+        self._WCS_version = "2.0.1"  # The only supported version
 
     def fetch_token(self, username=None, password=None, credentials_file_path=None):
-        """ Fetch the service token from Meteo-France.
+        """ 
+        Fetch the service token from Meteo-France.
         """
 
         if credentials_file_path is None:
@@ -58,12 +61,82 @@ class Fetcher:
         assert self.token[:2] == "__"
         assert self.token[-2:] == "__"
 
-    def _load_json_credentials(self, file_path):
-        """ Loads username and password from a json file.
+    def select_product(
+        self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01
+    ):
+        """ 
+        Select a weather product: model (AROME, ARPEGE, ...), 
+        area coverage (France, Europe, ...), accuracy (0.5, 0.01, ...).
         """
+        self._build_base_url(dataset, area, accuracy)
+        self._get_capabilities()  # refresh the list available data from the web services
+
+    def list_titles(self):
+        """ 
+        Give the list of titles (fields) available on the web service for the
+        chosen product. 
+
+        Notes
+        -----
+        We only select titles that are avaible on a 1H-based frequency. Other 
+        titles are excluded.
+        """
+        return list(np.sort(self._capa_1H.Title.unique()))
+
+    def set_title(
+        self, title: str = "Temperature at specified height level above ground"
+    ):
+        """ 
+        Set the Title (field) that is requested.
+        """
+        if title in list(np.sort(self._capa_1H.Title.unique())):
+            self.title = title
+        else:
+            raise ValueError(f"title '{title}' not found")
+
+    def list_available_run_times(self, title=""):
+        """ 
+        Return a list of run times available on the web service for the
+        chosen product/title.
+        """
+
+        if len(title) > 0:
+            self.set_title(title)
+
+        run_times = list(
+            np.sort(
+                self._capa_1H.loc[self._capa_1H.Title == self.title, "run_time"].values
+            )
+        )
+        run_times = np.datetime_as_string(run_times, timezone="UTC")
+        run_times = [dt.split(":")[0] for dt in run_times]
+        return run_times
+
+    def select_coverage_id(
+        self,
+        title: str = "Temperature at specified height level above ground",
+        run_time: str = "latest",
+    ):
+        """
+        Specify a CoverageId, which is a combination of Title and 
+        run_time. 
+        """
+        self.set_title(title)
+        self._get_coverage_id(run_time)
+
+    def update(self):
+        """ 
+        Refresh the list available data from the web services, 
+        i.e. latest run time.
+        """
+        self._get_capabilities()
+
+    # ==========
+
+    def _load_json_credentials(self, file_path):
+        # Loads username and password from a json file.
         with open(file_path) as json_file:
             creds = load(json_file)
-        credentials = {}
         return creds["username"], creds["password"]
 
     def _build_base_url(
@@ -110,18 +183,6 @@ class Fetcher:
             lambda s: datetime.strptime(s, "%Y-%m-%dT%H.%M.%S")
         )
 
-    def list_titles(self):
-        return list(np.sort(self._capa_1H.Title.unique()))
-
-    def set_title(
-        self, title: str = "Temperature at specified height level above ground"
-    ):
-
-        if title in list(np.sort(self._capa_1H.Title.unique())):
-            self.title = title
-        else:
-            raise ValueError(f"title '{title}' not found")
-
     def _get_coverage_id(self, run_time: str = "latest"):
         if run_time == "latest":
             self.CoverageId = (
@@ -136,37 +197,6 @@ class Fetcher:
             self.CoverageId = self._capa_1H.loc[
                 (self._capa_1H.Title == self.title) & (self._capa_1H.run_time == run_time)
             ].CoverageId.values[0]
-
-    def select_service(
-        self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01
-    ):
-        self._build_base_url(dataset, area, accuracy)
-        self._get_capabilities()
-
-    def list_available_run_times(self, title=""):
-
-        if len(title) > 0:
-            self.set_title(title)
-
-        run_times = list(
-            np.sort(
-                self._capa_1H.loc[self._capa_1H.Title == self.title, "run_time"].values
-            )
-        )
-        run_times = np.datetime_as_string(run_times, timezone="UTC")
-        run_times = [dt.split(":")[0] for dt in run_times]
-        return run_times
-
-    def select_coverage_id(
-        self,
-        title: str = "Temperature at specified height level above ground",
-        run_time: str = "latest",
-    ):
-        self.set_title(title)
-        self._get_coverage_id(run_time)
-
-    def update(self):
-        self._get_capabilities()
 
     # def _check_coords_in_domain(self, lon, lat):
     #     LON_MIN = -8.0
