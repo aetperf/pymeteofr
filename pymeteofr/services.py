@@ -64,6 +64,7 @@ class Fetcher:
         except requests.exceptions.RequestException as e:
             print("Something is wrong with the request", e)
 
+        print("GetAPIKey request")
         xmlData = r.content.decode("utf-8")
         d = xmltodict.parse(xmlData, process_namespaces=True)
         self.token = d["http://ws.apache.org/ns/synapse:Token"]
@@ -186,6 +187,7 @@ class Fetcher:
             self._url_base
             + f"SERVICE=WCS&REQUEST=GetCapabilities&version={self._WCS_version}&Language=eng"
         )
+        print("GetCapabilities request")
         r = requests.get(url)
         xmlData = r.content.decode("utf-8")
         d = xmltodict.parse(xmlData, process_namespaces=True)
@@ -306,6 +308,7 @@ class Describer:
         request.
         """
         url = self._build_url()
+        print("DescribeCoverage request")
         r = requests.get(url)
         xmlData = r.content.decode("utf-8")
         d = xmltodict.parse(xmlData, process_namespaces=True)
