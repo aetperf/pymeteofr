@@ -69,7 +69,7 @@ class Fetcher:
         area coverage (France, Europe, ...), accuracy (0.5, 0.01, ...).
         """
         self._build_base_url(dataset, area, accuracy)
-        self._get_capabilities()  # refresh the list available data from the web services
+        self._get_capabilities()  # refresh the list of available data
 
     def list_titles(self):
         """ 
@@ -126,7 +126,7 @@ class Fetcher:
 
     def update(self):
         """ 
-        Refresh the list available data from the web services, 
+        Refresh the list of available data from the web services, 
         i.e. latest run time.
         """
         self._get_capabilities()
@@ -255,9 +255,11 @@ class Fetcher:
 
 
 class ServiceOptionsChecker:
-    """ Check the different WCS options, e.g. dataset, area, accuracy.
+    """ 
+    Check the different WCS options, e.g. dataset, area, accuracy.
     """
 
+    # list of possible options:
     OPTIONS = [
         {
             "dataset": "arpege",
@@ -314,6 +316,9 @@ class ServiceOptionsChecker:
             self.choice = self.choice[self.choice.accuracy == accuracy]
 
     def get_url_base(self) -> str:
+        """
+        Return a base url, if the requested service has been found.
+        """
 
         if len(self.choice) == 0:
             raise ValueError("No service matching the criteria")
