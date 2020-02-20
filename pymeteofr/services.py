@@ -2,6 +2,9 @@
 
 service.py contains all tools concerning the wrapper of the Meteo-France web services.
 
+
+Note that we only select predicted weather fields that are available on a 1H-based 
+frequency.
 """
 from json import load
 from datetime import datetime, timedelta
@@ -17,26 +20,25 @@ class Fetcher:
     Main class for the web service wrapper.
     """
 
-    def __init__(self, token=None):
+    def __init__(self, token: str = ""):
         self.token = None
-        if token is not None:
+        if token != "":
             self.token = token
 
         self._WCS_version = "2.0.1"  # The only supported version
 
-    def fetch_token(self, username=None, password=None, credentials_file_path=None):
-        """ 
+    def fetch_token(
+        self, username: str = "", password: str = "", credentials_file_path: str = ""
+    ):
+        """
         Fetch the service token from Meteo-France.
         """
 
-        if credentials_file_path is None:
-            if (username is None) or (password is None):
+        if credentials_file_path == "":
+            if (username == "") or (password == ""):
                 raise AttributeError(f"both username and password should be given.")
         else:
             username, password = self._load_json_credentials(credentials_file_path)
-
-        if (not isinstance(username, str)) or (not isinstance(password, str)):
-            raise TypeError("username and password should be strings")
 
         url = (
             "https://geoservices.meteofrance.fr/"
@@ -78,7 +80,7 @@ class Fetcher:
 
         Notes
         -----
-        We only select titles that are avaible on a 1H-based frequency. Other 
+        We only select titles that are available on a 1H-based frequency. Other 
         titles are excluded.
         """
         return list(np.sort(self._capa_1H.Title.unique()))
@@ -100,7 +102,7 @@ class Fetcher:
         chosen product/title.
         """
 
-        if len(title) > 0:
+        if title != "":
             self.set_title(title)
 
         run_times = list(
@@ -133,7 +135,7 @@ class Fetcher:
 
     # ==========
 
-    def _load_json_credentials(self, file_path):
+    def _load_json_credentials(self, file_path: str = ""):
         # Loads username and password from a json file.
         with open(file_path) as json_file:
             creds = load(json_file)
