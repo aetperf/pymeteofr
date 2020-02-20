@@ -3,11 +3,15 @@
 service.py contains all tools concerning the wrapper of the Meteo-France web services.
 
 
-Note that we only select predicted weather fields that are available on a 1H-based 
-frequency.
+Notes
+-----
+- we only select predicted weather fields that are available on a 1H-based 
+frequency
+- all times are UTC
 """
 from json import load
 from datetime import datetime, timedelta
+from typing import List
 
 import xmltodict
 import requests
@@ -20,7 +24,7 @@ class Fetcher:
     Main class for the web service wrapper.
     """
 
-    def __init__(self, token: str = ""):
+    def __init__(self, token: str = "") -> None:
         self.token = None
         if token != "":
             self.token = token
@@ -29,7 +33,7 @@ class Fetcher:
 
     def fetch_token(
         self, username: str = "", password: str = "", credentials_file_path: str = ""
-    ):
+    ) -> None:
         """
         Fetch the service token from Meteo-France.
         """
@@ -65,7 +69,7 @@ class Fetcher:
 
     def select_product(
         self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01
-    ):
+    ) -> None:
         """ 
         Select a weather product: model (AROME, ARPEGE, ...), 
         area coverage (France, Europe, ...), accuracy (0.5, 0.01, ...).
@@ -73,7 +77,7 @@ class Fetcher:
         self._build_base_url(dataset, area, accuracy)
         self._get_capabilities()  # refresh the list of available data
 
-    def list_titles(self):
+    def list_titles(self) -> List[str]:
         """ 
         Give the list of titles (fields) available on the web service for the
         chosen product. 
@@ -87,7 +91,7 @@ class Fetcher:
 
     def set_title(
         self, title: str = "Temperature at specified height level above ground"
-    ):
+    ) -> None:
         """ 
         Set the Title (field) that is requested.
         """
@@ -96,7 +100,7 @@ class Fetcher:
         else:
             raise ValueError(f"title '{title}' not found")
 
-    def list_available_run_times(self, title=""):
+    def list_available_run_times(self, title="") -> List[str]:
         """ 
         Return a list of run times available on the web service for the
         chosen product/title.
@@ -118,7 +122,7 @@ class Fetcher:
         self,
         title: str = "Temperature at specified height level above ground",
         run_time: str = "latest",
-    ):
+    ) -> None:
         """
         Specify a CoverageId, which is a combination of Title and 
         run_time. 
@@ -126,7 +130,7 @@ class Fetcher:
         self.set_title(title)
         self._get_coverage_id(run_time)
 
-    def update(self):
+    def update(self) -> None:
         """ 
         Refresh the list of available data from the web services, 
         i.e. latest run time.
@@ -135,7 +139,7 @@ class Fetcher:
 
     # ==========
 
-    def _load_json_credentials(self, file_path: str = ""):
+    def _load_json_credentials(self, file_path: str = "") -> (str, str):
         # Loads username and password from a json file.
         with open(file_path) as json_file:
             creds = load(json_file)
@@ -143,7 +147,7 @@ class Fetcher:
 
     def _build_base_url(
         self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01,
-    ):
+    ) -> None:
         dataset = dataset.lower()
         area = area.lower()
         service_type = "wcs"
@@ -156,7 +160,7 @@ class Fetcher:
         # add token to base url
         self._url_base = self._url_base.replace("VOTRE_CLE", self.token)
 
-    def _get_capabilities(self):
+    def _get_capabilities(self) -> None:
 
         url = (
             self._url_base
@@ -185,7 +189,7 @@ class Fetcher:
             lambda s: datetime.strptime(s, "%Y-%m-%dT%H.%M.%S")
         )
 
-    def _get_coverage_id(self, run_time: str = "latest"):
+    def _get_coverage_id(self, run_time: str = "latest") -> None:
         if run_time == "latest":
             self.CoverageId = (
                 self._capa_1H.loc[self._capa_1H.Title == self.title]
@@ -301,7 +305,7 @@ class ServiceOptionsChecker:
         area: str = "",
         accuracy: float = 0.0,
         service_type: str = "wcs",
-    ):
+    ) -> None:
 
         self.choice = self.OPTIONS_DF.copy(deep=True)
 
