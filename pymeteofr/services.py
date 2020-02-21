@@ -226,16 +226,18 @@ class Fetcher:
                 (self._capa_1H.Title == self.title) & (self._capa_1H.run_time == run_time)
             ].CoverageId.values[0]
 
-    def _create_next_24_hours_dts_iso(self) -> List[str]:
+    def _create_next_hours_dts_iso(self, n: int = 24) -> List[str]:
         now = datetime.utcnow()
         next24h = []
-        for i in range(1, 25):
+        for i in range(n):
             next24h.append(
                 datetime(now.year, now.month, now.day, now.hour, 0, 0)
-                + timedelta(hours=i)
+                + timedelta(hours=i + 1)
             )
         next24h = [dt.isoformat() + "Z" for dt in next24h]
         return next24h
+
+    # def _check_next_hours_availability(self, ):
 
     # def _check_coords_in_domain(self, lon, lat):
     #     if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
