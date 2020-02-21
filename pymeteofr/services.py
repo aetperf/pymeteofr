@@ -167,6 +167,7 @@ class Fetcher:
             run_times = self.list_available_run_times()
             self.run_time = run_times[-2]
             print("Switched to before last available run time")
+            self._get_coverage_id(self.run_time)
         else:
             print("Kept the last available run time")
 
@@ -185,6 +186,8 @@ class Fetcher:
         self._check_coords_in_domain(lon_max, lat_max)
         self.bbox = (lon_min, lat_min, lon_max, lat_max)
         self._create_an_integer_bbox(lon_min, lat_min, lon_max, lat_max)
+
+    # def fetch_
 
     # ==========
 
