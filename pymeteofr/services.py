@@ -270,9 +270,9 @@ class Fetcher:
 
     def _check_next_hours_availability(self, n: int = 24) -> bool:
         available_dts = self.dts_iso
-        requested_dts = self._create_next_hours_dts_iso(n)
+        self.requested_dts = self._create_next_hours_dts_iso(n)
         is_available = False
-        if len(set(requested_dts).difference(set(available_dts))) == 0:
+        if len(set(self.requested_dts).difference(set(available_dts))) == 0:
             is_available = True
         return is_available
 
