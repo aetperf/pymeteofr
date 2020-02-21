@@ -64,7 +64,7 @@ class Fetcher:
         except requests.exceptions.RequestException as e:
             print("Something is wrong with the request", e)
 
-        print("GetAPIKey request")
+        print("-- GetAPIKey request --")
         xmlData = r.content.decode("utf-8")
         d = xmltodict.parse(xmlData, process_namespaces=True)
         self.token = d["http://ws.apache.org/ns/synapse:Token"]
@@ -150,7 +150,7 @@ class Fetcher:
         describer.get_description()
 
         # bounding box of the area covered
-        self.bbox = describer.bbox
+        self.max_bbox = describer.max_bbox
 
         # available time stamps
         start = datetime.strptime(describer.beginPosition, "%Y-%m-%dT%H:%M:%SZ")
@@ -169,6 +169,22 @@ class Fetcher:
             print("Switched to before last available run time")
         else:
             print("Kept the last available run time")
+
+    def set_bbox_of_interest(
+        self, lon_min: float, lat_min: float, lon_max: float, lat_max: float
+    ):
+        """ 
+        Set a bounding box of interest from corners coords.
+        """
+        if (lon_min >= lon_max) or (lat_min >= lat_max):
+            raise AttributeError(
+                f"min coord ({lon_min}, {lat_min})"
+                + f" should be smaller than max ({lon_max}, {lat_max})"
+            )
+        self._check_coords_in_domain(lon_min, lat_min)
+        self._check_coords_in_domain(lon_max, lat_max)
+        self.bbox = (lon_min, lat_min, lon_max, lat_max)
+        self._create_an_integer_bbox(lon_min, lat_min, lon_max, lat_max)
 
     # ==========
 
@@ -199,7 +215,7 @@ class Fetcher:
             self._url_base
             + f"SERVICE=WCS&REQUEST=GetCapabilities&version={self._WCS_version}&Language=eng"
         )
-        print("GetCapabilities request")
+        print("-- GetCapabilities request --")
         r = requests.get(url)
         xmlData = r.content.decode("utf-8")
         d = xmltodict.parse(xmlData, process_namespaces=True)
@@ -257,9 +273,32 @@ class Fetcher:
             is_available = True
         return is_available
 
-    # def _check_coords_in_domain(self, lon, lat):
-    #     if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
-    #         raise AttributeError(f"point ({lon}, {lat}) is outside the model domain")
+    def _check_coords_in_domain(self, lon: float, lat: float):
+        if (
+            (lon < self.max_bbox[0])
+            or (lon > self.max_bbox[2])
+            or (lat < self.max_bbox[1])
+            or (lat > self.max_bbox[3])
+        ):
+            raise ValueError(f"Point ({lon}, {lat}) is outside the model domain")
+
+    def _create_an_integer_bbox(
+        self, lon_min: float, lat_min: float, lon_max: float, lat_max: float
+    ):
+        lon_min_int = int(np.floor(lon_min))
+        if float(lon_min_int) < self.max_bbox[0]:
+            raise ValueError("Left bounding box side is outside covered area")
+        lat_min_int = int(np.floor(lat_min))
+        if float(lat_min_int) < self.max_bbox[1]:
+            raise ValueError("Lower bounding box side is outside covered area")
+        lon_max_int = int(np.ceil(lon_max))
+        if float(lon_max_int) > self.max_bbox[2]:
+            raise ValueError("Right bounding box side is outside covered area")
+        lat_max_int = int(np.ceil(lat_max))
+        if float(lat_max_int) > self.max_bbox[3]:
+            raise ValueError("Upper bounding box side is outside covered area")
+
+        self.bbox_int = (lon_min_int, lat_min_int, lon_max_int, lat_max_int)
 
     # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
@@ -268,29 +307,6 @@ class Fetcher:
     #     self.poi = {"lon": lon, "lat": lat}
     #     margin = 0.02
     #     self.set_bboxoi(lon - margin, lon + margin, lat - margin, lat + margin)
-
-    # def set_bboxoi(self, lon_min, lon_max, lat_min, lat_max):
-    #     """ Set a bounding box of interest from corners coords.
-
-    #         Note : coords are expressed in WGS84 (EPSG:4326) CRS.
-    #     """
-
-    #     if (
-    #         (not isinstance(lon_min, float))
-    #         or (not isinstance(lon_max, float) or not isinstance(lat_min, float))
-    #         or (not isinstance(lat_max, float))
-    #     ):
-    #         raise TypeError("lon and lat coordinates should be floats")
-    #     if (lon_min >= lon_max) or (lat_min >= lat_max):
-    #         raise AttributeError("min coord should be smaller than max")
-    #     self._check_coords_in_domain(lon_min, lat_min)
-    #     self._check_coords_in_domain(lon_max, lat_max)
-    #     self.bbox = {
-    #         "lon_min": int(np.floor(lon_min)),
-    #         "lat_min": int(np.floor(lat_min)),
-    #         "lon_max": int(np.ceil(lon_max)),
-    #         "lat_max": int(np.ceil(lat_max)),
-    #     }
 
     # def create_url_arome_001(self, field="temperature", hours=2):
 
@@ -330,7 +346,7 @@ class Describer:
         request.
         """
         url = self._build_url()
-        print("DescribeCoverage request")
+        print("-- DescribeCoverage request --")
         r = requests.get(url)
         xmlData = r.content.decode("utf-8")
         d = xmltodict.parse(xmlData, process_namespaces=True)
@@ -358,7 +374,7 @@ class Describer:
         self.lon_max = float(self.upperCorner.split(" ")[0])
         self.lat_max = float(self.upperCorner.split(" ")[1])
 
-        self.bbox = (self.lon_min, self.lat_min, self.lon_max, self.lat_max)
+        self.max_bbox = (self.lon_min, self.lat_min, self.lon_max, self.lat_max)
 
 
 class ServiceOptionsChecker:
