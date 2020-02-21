@@ -144,7 +144,7 @@ class Fetcher:
 
     def describe(self):
         """
-        Get spatial and temporal information of the the selected CoverageId
+        Get spatial and temporal information about the selected CoverageId
         """
         describer = Describer(self._url_base, self.CoverageId, self._WCS_version)
         describer.get_description()
@@ -157,6 +157,18 @@ class Fetcher:
         end = datetime.strptime(describer.endPosition, "%Y-%m-%dT%H:%M:%SZ")
         self.dts = pd.date_range(start=start, end=end, freq="H")
         self.dts_iso = [dt.isoformat() + "Z" for dt in self.dts]
+
+    def set_complete_run_time(self, horizon: int = 24) -> None:
+        """
+        Look for the latest available run time that can cover the horizon, e.g.
+        the next 24 hours.
+        """
+        if not self._check_next_hours_availability(horizon):
+            run_times = fetcher.list_available_run_times()
+            self.run_time = run_times[-2]
+            print("Switched to before last available run time")
+        else:
+            print("Kept the last available run time")
 
     # ==========
 
