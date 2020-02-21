@@ -31,6 +31,7 @@ class Fetcher:
             self.token = token
 
         self._WCS_version = "2.0.1"  # The only supported version
+        self._proj = "EPSG:4326"  # The only supported projection
         self._url_base = ""
         self._CoverageId = ""
 
@@ -301,7 +302,7 @@ class Fetcher:
         if float(lat_max_int) > self.max_bbox[3]:
             raise ValueError("Upper bounding box side is outside covered area")
 
-        self.bbox_int = (lon_min_int, lat_min_int, lon_max_int, lat_max_int)
+        self._bbox_int = (lon_min_int, lat_min_int, lon_max_int, lat_max_int)
 
     # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
