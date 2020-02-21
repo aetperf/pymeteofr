@@ -237,7 +237,13 @@ class Fetcher:
         next24h = [dt.isoformat() + "Z" for dt in next24h]
         return next24h
 
-    # def _check_next_hours_availability(self, ):
+    def _check_next_hours_availability(self, n: int = 24) -> bool:
+        available_dts = self.dts_iso
+        requested_dts = self._create_next_hours_dts_iso(n)
+        is_available = False
+        if len(set(requested_dts).difference(set(available_dts))) == 0:
+            is_available = True
+        return is_available
 
     # def _check_coords_in_domain(self, lon, lat):
     #     if (lon < LON_MIN) or (lon > LON_MAX) or (lat < LAT_MIN) or (lat > LAT_MAX):
