@@ -164,7 +164,7 @@ class Fetcher:
         the next 24 hours.
         """
         if not self._check_next_hours_availability(horizon):
-            run_times = fetcher.list_available_run_times()
+            run_times = self.list_available_run_times()
             self.run_time = run_times[-2]
             print("Switched to before last available run time")
         else:
