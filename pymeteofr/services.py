@@ -36,7 +36,11 @@ class Fetcher:
 
         self._WCS_version = "2.0.1"  # The only supported version
         self._proj = "EPSG:4326"  # The only supported projection
-        self.compression = "DEFLATE"  # PACKBITS, LZW, JPEG, DEFLATE
+        self.compression = "DEFLATE"  # tiff compression : PACKBITS, LZW, JPEG, DEFLATE
+
+        self.max_trials = 20  # maximum number of trials of the same request
+        self._sleep_time = 1.0  # seconds to wait before retrying a request
+
         self._url_base = ""
         self._CoverageId = ""
 
@@ -223,23 +227,24 @@ class Fetcher:
                 url += "&subset=height(2)"
 
             valid_data = False
-            while not valid_data:
+            trial = 0
+            while (not valid_data) & (trial < self.max_trials):
                 fetched_dt = False
-                tentative = 0
+                trial += 1
+                print(f"-- GetCoverage request {dt} --")
                 try:
-                    tentative += 1
-                    print(f"-- GetCoverage request {dt} --")
                     r = urllib.request.urlopen(url)
                     fetched_dt = True
                 except:
-                    while not fetched_dt:
+                    sleep(self._sleep_time)
+                    while (not fetched_dt) & (trial < self.max_trials):
+                        trial += 1
+                        print(f"-- GetCoverage request {dt} --")
                         try:
-                            tentative += 1
-                            print(f"-- GetCoverage request {dt} --")
                             r = urllib.request.urlopen(url)
                             fetched_dt = True
                         except:
-                            sleep(1)
+                            sleep(self._sleep_time)
                 try:
                     with rio.open(r) as dataset:
                         assert dataset.count == 1
