@@ -16,6 +16,7 @@ requirements = [
     "xmltodict",
     "rasterio",
     "scipy",
+    "xarray",
 ]
 
 setup_requirements = []
