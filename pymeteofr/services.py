@@ -197,7 +197,69 @@ class Fetcher:
         self.bbox = (lon_min, lat_min, lon_max, lat_max)
         self._create_an_integer_bbox(lon_min, lat_min, lon_max, lat_max)
 
-    # def fetch_
+    def create_3D_array(self):
+
+        arrays = []
+        meta_data = {}
+
+        got_grid = False
+        for dt in self.requested_dts:
+
+            url = (
+                self._url_base
+                + f"SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&CRS={self._proj}"
+                + f"&coverageId={self.CoverageId}&subset=time({dt})&subset=long({self._bbox_int[0]},{self._bbox_int[2]})&subset=lat({self._bbox_int[1]},{self._bbox_int[3]})"
+            )
+            if self.title_with_height:
+                url += "&subset=height(2)"
+
+            valid_data = False
+            while not valid_data:
+                fetched_dt = False
+                tentative = 0
+                try:
+                    tentative += 1
+                    print(f"-- GetCoverage request {dt} --")
+                    r = urllib.request.urlopen(url)
+                    fetched_dt = True
+                except:
+                    while not fetched_dt:
+                        try:
+                            tentative += 1
+                            print(f"-- GetCoverage request {dt} --")
+                            r = urllib.request.urlopen(url)
+                            fetched_dt = True
+                        except:
+                            sleep(1)
+                try:
+                    with rio.open(r) as dataset:
+                        assert dataset.count == 1
+                        if not got_grid:
+                            meta_data["width"] = dataset.width
+                            meta_data["height"] = dataset.height
+                            meta_data["bounds"] = dataset.bounds
+                        else:
+                            assert meta_data["width"] == dataset.width
+                            assert meta_data["height"] == dataset.height
+                            assert meta_data["bounds"] == dataset.bounds
+                        valid_data = True
+                        arrays.append(dataset.read(1)[::-1, :])
+                except:
+                    pass
+
+        array = np.dstack(arrays)
+        dts = [datetime.strptime(dt, "%Y-%m-%dT%H:%M:%SZ") for dt in self.requested_dts]
+
+        bounds = meta_data["bounds"]
+        x = np.linspace(
+            meta_data["bounds"].left, meta_data["bounds"].right, meta_data["width"]
+        )
+        y = np.linspace(
+            meta_data["bounds"].bottom, meta_data["bounds"].top, meta_data["height"]
+        )
+        self.data = xr.DataArray(
+            array, dims=["y", "x", "dt"], coords={"x": x, "y": y, "dt": dts},
+        )
 
     # ==========
 
@@ -313,69 +375,6 @@ class Fetcher:
 
         self._bbox_int = (lon_min_int, lat_min_int, lon_max_int, lat_max_int)
 
-    def create_3D_array(self):
-
-        arrays = []
-        meta_data = {}
-
-        got_grid = False
-        for dt in self.requested_dts:
-
-            url = (
-                self._url_base
-                + f"SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&CRS={self._proj}"
-                + f"&coverageId={self.CoverageId}&subset=time({dt})&subset=long({self._bbox_int[0]},{self._bbox_int[2]})&subset=lat({self._bbox_int[1]},{self._bbox_int[3]})"
-            )
-            if self.title_with_height:
-                url += "&subset=height(2)"
-
-            valid_data = False
-            while not valid_data:
-                fetched_dt = False
-                tentative = 0
-                try:
-                    tentative += 1
-                    print(f"-- GetCoverage request {dt} --")
-                    r = urllib.request.urlopen(url)
-                    fetched_dt = True
-                except:
-                    while not fetched_dt:
-                        try:
-                            tentative += 1
-                            print(f"-- GetCoverage request {dt} --")
-                            r = urllib.request.urlopen(url)
-                            fetched_dt = True
-                        except:
-                            sleep(1)
-                try:
-                    with rio.open(r) as dataset:
-                        assert dataset.count == 1
-                        if not got_grid:
-                            meta_data["width"] = dataset.width
-                            meta_data["height"] = dataset.height
-                            meta_data["bounds"] = dataset.bounds
-                        else:
-                            assert meta_data["width"] == dataset.width
-                            assert meta_data["height"] == dataset.height
-                            assert meta_data["bounds"] == dataset.bounds
-                        valid_data = True
-                        arrays.append(dataset.read(1)[::-1, :])
-                except:
-                    pass
-
-        array = np.dstack(arrays)
-        dts = [datetime.strptime(dt, "%Y-%m-%dT%H:%M:%SZ") for dt in self.requested_dts]
-
-        bounds = meta_data["bounds"]
-        x = np.linspace(
-            meta_data["bounds"].left, meta_data["bounds"].right, meta_data["width"]
-        )
-        y = np.linspace(
-            meta_data["bounds"].bottom, meta_data["bounds"].top, meta_data["height"]
-        )
-        self.data = xr.DataArray(
-            array, dims=["y", "x", "dt"], coords={"x": x, "y": y, "dt": dts},
-        )
 
     # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
