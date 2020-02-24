@@ -167,10 +167,11 @@ class Fetcher:
         Look for the latest available run time that can cover the horizon, e.g.
         the next 24 hours.
         """
+        self.describe()
         idx = -1
         while not self._check_next_hours_availability(horizon):
-            idx -= 1
             run_times = self.list_available_run_times()
+            idx -= 1
             self.run_time = run_times[idx]
             print(f"Switched to previous (Python index: {idx}) run time")
             self._set_coverage_id(self.run_time)
