@@ -102,6 +102,9 @@ class Fetcher:
         """
         if title in list(np.sort(self._capa_1H.Title.unique())):
             self.title = title
+            self.title_with_height = False
+            if "at specified height level above ground" in self.title:
+                self.title_with_height = True
         else:
             raise ValueError(f"title '{title}' not found")
 
