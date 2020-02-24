@@ -136,7 +136,7 @@ class Fetcher:
         run_time. 
         """
         self.set_title(title)
-        self._get_coverage_id(run_time)
+        self._set_coverage_id(run_time)
         self.run_time = self.CoverageId.split("___")[-1].replace(".", ":")
 
     def update(self) -> None:
@@ -167,13 +167,14 @@ class Fetcher:
         Look for the latest available run time that can cover the horizon, e.g.
         the next 24 hours.
         """
-        if not self._check_next_hours_availability(horizon):
+        idx = -1
+        while not self._check_next_hours_availability(horizon):
+            idx -= 1
             run_times = self.list_available_run_times()
-            self.run_time = run_times[-2]
-            print("Switched to before last available run time")
-            self._get_coverage_id(self.run_time)
-        else:
-            print("Kept the last available run time")
+            self.run_time = run_times[idx]
+            print(f"Switched to previous (Python index: {idx}) run time")
+            self._set_coverage_id(self.run_time)
+            self.describe()
 
     def set_bbox_of_interest(
         self, lon_min: float, lat_min: float, lon_max: float, lat_max: float
@@ -246,7 +247,7 @@ class Fetcher:
             lambda s: datetime.strptime(s, "%Y-%m-%dT%H.%M.%S")
         )
 
-    def _get_coverage_id(self, run_time: str = "latest") -> None:
+    def _set_coverage_id(self, run_time: str = "latest") -> None:
         if run_time == "latest":
             self.CoverageId = (
                 self._capa_1H.loc[self._capa_1H.Title == self.title]
