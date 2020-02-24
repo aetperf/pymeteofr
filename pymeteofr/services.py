@@ -36,6 +36,7 @@ class Fetcher:
 
         self._WCS_version = "2.0.1"  # The only supported version
         self._proj = "EPSG:4326"  # The only supported projection
+        self.compression = "DEFLATE"  # PACKBITS, LZW, JPEG, DEFLATE
         self._url_base = ""
         self._CoverageId = ""
 
@@ -210,8 +211,13 @@ class Fetcher:
 
             url = (
                 self._url_base
-                + f"SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&CRS={self._proj}"
-                + f"&coverageId={self.CoverageId}&subset=time({dt})&subset=long({self._bbox_int[0]},{self._bbox_int[2]})&subset=lat({self._bbox_int[1]},{self._bbox_int[3]})"
+                + f"SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage"
+                + f"&format=image/tiff&geotiff:compression={self.compression}"
+                + f"&CRS={self._proj}"
+                + f"&coverageId={self.CoverageId}"
+                + f"&subset=time({dt})"
+                + f"&subset=long({self._bbox_int[0]},{self._bbox_int[2]})"
+                + f"&subset=lat({self._bbox_int[1]},{self._bbox_int[3]})"
             )
             if self.title_with_height:
                 url += "&subset=height(2)"
@@ -377,7 +383,6 @@ class Fetcher:
             raise ValueError("Upper bounding box side is outside covered area")
 
         self._bbox_int = (lon_min_int, lat_min_int, lon_max_int, lat_max_int)
-
 
     # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
