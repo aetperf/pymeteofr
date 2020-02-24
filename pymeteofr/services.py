@@ -183,7 +183,7 @@ class Fetcher:
 
     def set_bbox_of_interest(
         self, lon_min: float, lat_min: float, lon_max: float, lat_max: float
-    ):
+    ) -> None:
         """ 
         Set a bounding box of interest from corners coords.
         """
@@ -197,7 +197,10 @@ class Fetcher:
         self.bbox = (lon_min, lat_min, lon_max, lat_max)
         self._create_an_integer_bbox(lon_min, lat_min, lon_max, lat_max)
 
-    def create_3D_array(self):
+    def create_3D_array(self) -> None:
+        """
+        Loop over the requested dts, fetch the data and gather everything into a xarray.
+        """
 
         arrays = []
         meta_data = {}
