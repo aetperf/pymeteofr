@@ -501,6 +501,41 @@ class ServiceOptionsChecker:
             "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?",
             "service_type": "wcs",
         },
+        {
+            "dataset": "arome",
+            "area": "antilles",
+            "accuracy": 0.025,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-ANTIL-WCS?",
+            "service_type": "wcs",
+        },
+        {
+            "dataset": "arome",
+            "area": "guyane",
+            "accuracy": 0.025,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-GUYANE-WCS?",
+            "service_type": "wcs",
+        },
+        {
+            "dataset": "arome",
+            "area": "réunion",
+            "accuracy": 0.025,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-INDIEN-WCS?",
+            "service_type": "wcs",
+        },
+        {
+            "dataset": "arome",
+            "area": "nouvelle-calédonie",
+            "accuracy": 0.025,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-NCALED-WCS?",
+            "service_type": "wcs",
+        },
+        {
+            "dataset": "arome",
+            "area": "polynésie",
+            "accuracy": 0.025,
+            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-POLYN-WCS?",
+            "service_type": "wcs",
+        },
     ]
 
     OPTIONS_DF = pd.DataFrame(OPTIONS)
