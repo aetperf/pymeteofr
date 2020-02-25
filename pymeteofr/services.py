@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 import rasterio as rio
 import xarray as xr
+from matplotlib import pyplot as plt
 
 
 class Fetcher:
@@ -287,7 +288,27 @@ class Fetcher:
             array, dims=["y", "x", "dt"], coords={"x": x, "y": y, "dt": dts},
         )
 
-    # def make_movie()
+    def make_movie(
+        self,
+        n_levels: int = 40,
+        cmap: str = "jet",
+        root_name: str = "movie",
+        dpi: int = 100,
+    ):
+        # create temp data dir if nit does not exist
+        X, Y = np.meshgrid(self.data["x"], self.data["y"])
+        array = self.data.values
+        mean = np.mean(array[np.where(array < 9999)])
+        array = np.where(array == 9999.0, mean, array)
+        mini, maxi = int(np.floor(np.min(array))), int(np.ceil(np.max(array)))
+        for i in range(array.shape[2]):
+            fig, ax = plt.subplots(figsize=(15, 7))
+            CS = ax.contourf(X, Y, array[:, :, i], levels=n_levels, cmap=cmap)
+            ax.set_title(self.data["dt"].values[i])
+            cbar = fig.colorbar(CS)
+            cbar.ax.set_ylabel(self.title)
+            plt.savefig(f"{root_name}_{str(i).zfill(2)}.png", dpi=dpi)
+            plt.close()
 
     # ==========
 
@@ -319,20 +340,27 @@ class Fetcher:
             + f"SERVICE=WCS&REQUEST=GetCapabilities&version={self._WCS_version}"
             + "&Language=eng"
         )
-        print("-- GetCapabilities request --")
-        r = requests.get(url)
-        xmlData = r.content.decode("utf-8")
-        d = xmltodict.parse(xmlData, process_namespaces=True)
-        root = d[list(d.keys())[0]]
-        capa = pd.DataFrame(
-            root["http://www.opengis.net/wcs/2.0:Contents"][
-                "http://www.opengis.net/wcs/2.0:CoverageSummary"
-            ]
-        )
-        capa.columns = [col.split(":")[-1] for col in capa.columns]
-        capa["run_time_suffix"] = capa.CoverageId.map(
-            lambda s: s.split("___")[-1].split("Z")[-1].strip()
-        )
+        trial = 0
+        while trial < self.max_trials:
+            try:
+                print("-- GetCapabilities request --")
+                trial += 1
+                r = requests.get(url)
+                xmlData = r.content.decode("utf-8")
+                d = xmltodict.parse(xmlData, process_namespaces=True)
+                root = d[list(d.keys())[0]]
+                capa = pd.DataFrame(
+                    root["http://www.opengis.net/wcs/2.0:Contents"][
+                        "http://www.opengis.net/wcs/2.0:CoverageSummary"
+                    ]
+                )
+                capa.columns = [col.split(":")[-1] for col in capa.columns]
+                capa["run_time_suffix"] = capa.CoverageId.map(
+                    lambda s: s.split("___")[-1].split("Z")[-1].strip()
+                )
+                break
+            except KeyError:
+                sleep(self._sleep_time)
 
         self._capa_1H = capa[capa.run_time_suffix == ""].copy(deep=True)
         self._capa_1H.drop("run_time_suffix", axis=1, inplace=True)
