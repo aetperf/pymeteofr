@@ -37,7 +37,6 @@ class Fetcher:
         self._WCS_version = "2.0.1"  # The only supported version
         self._proj = "EPSG:4326"  # The only supported projection
         self.compression = "DEFLATE"  # tiff compression : PACKBITS, LZW, JPEG, DEFLATE
-
         self.max_trials = 20  # maximum number of trials of the same request
         self._sleep_time = 1.0  # seconds to wait before retrying a request
 
@@ -171,7 +170,7 @@ class Fetcher:
         self.dts = pd.date_range(start=start, end=end, freq="H")
         self.dts_iso = [dt.isoformat() + "Z" for dt in self.dts]
 
-    def set_complete_run_time(self, horizon: int = 24) -> None:
+    def check_run_time(self, horizon: int = 24) -> None:
         """
         Look for the latest available run time that can cover the horizon, e.g.
         the next 24 hours.
@@ -302,7 +301,8 @@ class Fetcher:
 
         url = (
             self._url_base
-            + f"SERVICE=WCS&REQUEST=GetCapabilities&version={self._WCS_version}&Language=eng"
+            + f"SERVICE=WCS&REQUEST=GetCapabilities&version={self._WCS_version}"
+            + "&Language=eng"
         )
         print("-- GetCapabilities request --")
         r = requests.get(url)
@@ -472,68 +472,69 @@ class ServiceOptionsChecker:
     """
 
     # list of possible options:
+    root = "https://geoservices.meteofrance.fr/api/VOTRE_CLE/"
     OPTIONS = [
         {
             "dataset": "arpege",
             "area": "world",
             "accuracy": 0.5,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-GLOBAL-ARPEGE-05-GLOBE-WCS?",
+            "url_base": root + "MF-NWP-GLOBAL-ARPEGE-05-GLOBE-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arpege",
             "area": "europe",
             "accuracy": 0.1,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-GLOBAL-ARPEGE-01-EUROPE-WCS?",
+            "url_base": root + "MF-NWP-GLOBAL-ARPEGE-01-EUROPE-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arome",
             "area": "france",
             "accuracy": 0.025,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-0025-FRANCE-WCS?",
+            "url_base": root + "MF-NWP-HIGHRES-AROME-0025-FRANCE-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arome",
             "area": "france",
             "accuracy": 0.01,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?",
+            "url_base": root + "MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arome",
             "area": "antilles",
             "accuracy": 0.025,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-ANTIL-WCS?",
+            "url_base": root + "MF-NWP-HIGHRES-AROME-OM-0025-ANTIL-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arome",
             "area": "guyane",
             "accuracy": 0.025,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-GUYANE-WCS?",
+            "url_base": root + "MF-NWP-HIGHRES-AROME-OM-0025-GUYANE-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arome",
             "area": "réunion",
             "accuracy": 0.025,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-INDIEN-WCS?",
+            "url_base": root + "MF-NWP-HIGHRES-AROME-OM-0025-INDIEN-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arome",
             "area": "nouvelle-calédonie",
             "accuracy": 0.025,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-NCALED-WCS?",
+            "url_base": root + "MF-NWP-HIGHRES-AROME-OM-0025-NCALED-WCS?",
             "service_type": "wcs",
         },
         {
             "dataset": "arome",
             "area": "polynésie",
             "accuracy": 0.025,
-            "url_base": "https://geoservices.meteofrance.fr/api/VOTRE_CLE/MF-NWP-HIGHRES-AROME-OM-0025-POLYN-WCS?",
+            "url_base": root + "MF-NWP-HIGHRES-AROME-OM-0025-POLYN-WCS?",
             "service_type": "wcs",
         },
     ]
