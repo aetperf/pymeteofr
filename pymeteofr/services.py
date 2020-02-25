@@ -40,6 +40,7 @@ class Fetcher:
         self.max_trials = 20  # maximum number of trials of the same request
         self._sleep_time = 1.0  # seconds to wait before retrying a request
 
+        self.bbox = None
         self._url_base = ""
         self._CoverageId = ""
 
@@ -199,7 +200,6 @@ class Fetcher:
         self._check_coords_in_domain(lon_min, lat_min)
         self._check_coords_in_domain(lon_max, lat_max)
         self.bbox = (lon_min, lat_min, lon_max, lat_max)
-        self._create_an_integer_bbox(lon_min, lat_min, lon_max, lat_max)
 
     def create_3D_array(self) -> None:
         """
@@ -219,9 +219,12 @@ class Fetcher:
                 + f"&CRS={self._proj}"
                 + f"&coverageId={self.CoverageId}"
                 + f"&subset=time({dt})"
-                + f"&subset=long({self._bbox_int[0]},{self._bbox_int[2]})"
-                + f"&subset=lat({self._bbox_int[1]},{self._bbox_int[3]})"
             )
+            if self.bbox is not None:
+                url += (
+                    +f"&subset=long({self.bbox[0]},{self.bbox[2]})"
+                    + f"&subset=lat({self.bbox[1]},{self.bbox[3]})"
+                )
             if self.title_with_height:
                 url += "&subset=height(2)"
 
@@ -364,30 +367,12 @@ class Fetcher:
 
     def _check_coords_in_domain(self, lon: float, lat: float):
         if (
-            (lon < self.max_bbox[0])
-            or (lon > self.max_bbox[2])
-            or (lat < self.max_bbox[1])
-            or (lat > self.max_bbox[3])
+            (lon <= self.max_bbox[0])
+            or (lon >= self.max_bbox[2])
+            or (lat <= self.max_bbox[1])
+            or (lat >= self.max_bbox[3])
         ):
             raise ValueError(f"Point ({lon}, {lat}) is outside the model domain")
-
-    def _create_an_integer_bbox(
-        self, lon_min: float, lat_min: float, lon_max: float, lat_max: float
-    ):
-        lon_min_int = int(np.floor(lon_min))
-        if float(lon_min_int) < self.max_bbox[0]:
-            raise ValueError("Left bounding box side is outside covered area")
-        lat_min_int = int(np.floor(lat_min))
-        if float(lat_min_int) < self.max_bbox[1]:
-            raise ValueError("Lower bounding box side is outside covered area")
-        lon_max_int = int(np.ceil(lon_max))
-        if float(lon_max_int) > self.max_bbox[2]:
-            raise ValueError("Right bounding box side is outside covered area")
-        lat_max_int = int(np.ceil(lat_max))
-        if float(lat_max_int) > self.max_bbox[3]:
-            raise ValueError("Upper bounding box side is outside covered area")
-
-        self._bbox_int = (lon_min_int, lat_min_int, lon_max_int, lat_max_int)
 
     # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
