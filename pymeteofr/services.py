@@ -390,17 +390,6 @@ class Fetcher:
     #     margin = 0.02
     #     self.set_bboxoi(lon - margin, lon + margin, lat - margin, lat + margin)
 
-    # def create_url_arome_001(self, field="temperature", hours=2):
-
-    #     # run_time_iso = run_time.isoformat()
-    #     end_time = datetime.utcnow() + timedelta(hours=hours)
-    #     end_time_iso = end_time.isoformat()
-
-    #     if field == "temperature":
-    #         url = f"https://geoservices.meteofrance.fr/api/{self.token}/MF-NWP-HIGHRES-AROME-001-FRANCE-WCS?SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage&format=image/tiff&coverageId=TEMPERATURE__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND__&subset=time({end_time_iso}Z)&subset=lat({str(self.bbox['lat_min'])},{str(self.bbox['lat_max'])})&subset=long({str(self.bbox['lon_min'])},{str(self.bbox['lon_max'])})&subset=height(2)"
-
-    #     return url
-
 
 class Describer:
     def __init__(
