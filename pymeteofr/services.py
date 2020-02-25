@@ -221,8 +221,9 @@ class Fetcher:
                 + f"&subset=time({dt})"
             )
             if self.bbox is not None:
-                url += (
-                    +f"&subset=long({self.bbox[0]},{self.bbox[2]})"
+                url = (
+                    url
+                    + f"&subset=long({self.bbox[0]},{self.bbox[2]})"
                     + f"&subset=lat({self.bbox[1]},{self.bbox[3]})"
                 )
             if self.title_with_height:
