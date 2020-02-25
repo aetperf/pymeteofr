@@ -233,6 +233,8 @@ class Fetcher:
                     + f"&subset=long({self.bbox[0]},{self.bbox[2]})"
                     + f"&subset=lat({self.bbox[1]},{self.bbox[3]})"
                 )
+            else:
+                self.bbox = self.max_bbox
             if self.title_with_height:
                 url += "&subset=height(2)"
 
@@ -284,6 +286,8 @@ class Fetcher:
         self.data = xr.DataArray(
             array, dims=["y", "x", "dt"], coords={"x": x, "y": y, "dt": dts},
         )
+
+    # def make_movie()
 
     # ==========
 
