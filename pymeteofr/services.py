@@ -201,6 +201,13 @@ class Fetcher:
         self._check_coords_in_domain(lon_max, lat_max)
         self.bbox = (lon_min, lat_min, lon_max, lat_max)
 
+    def reset_bbox(self) -> None:
+        """
+        Reset to None the bounding box, which is equivalent to use the maximum 
+        bounding box (the one from the product spatial coverage).
+        """
+        self.bbox = None
+
     def create_3D_array(self) -> None:
         """
         Loop over the requested dts, fetch the data and gather everything into a xarray.
