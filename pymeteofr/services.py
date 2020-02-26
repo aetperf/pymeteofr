@@ -314,8 +314,8 @@ class Fetcher:
         cmap = mpl.colors.ListedColormap(palette[cc_cmap], name=cc_cmap)
 
         # figure text size
-        mpl.rcParams.update({"xtick.labelsize": fontsize})
-        mpl.rcParams.update({"ytick.labelsize": fontsize})
+        mpl.rcParams.update({"xtick.labelsize": fontsize - 2})
+        mpl.rcParams.update({"ytick.labelsize": fontsize - 2})
         mpl.rcParams.update({"axes.labelsize": fontsize})
         mpl.rcParams.update({"axes.titlesize": fontsize})
         mpl.rcParams.update({"font.size": fontsize})
@@ -335,8 +335,8 @@ class Fetcher:
             )
             cbar = fig.colorbar(CS)
             plt.text(
-                0.5,
-                0.95,
+                x=0.5,
+                y=0.95,
                 s=dt_string,
                 horizontalalignment="center",
                 verticalalignment="center",
