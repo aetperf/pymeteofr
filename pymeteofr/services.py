@@ -227,23 +227,7 @@ class Fetcher:
         got_grid = False
         for dt in self.requested_dts:
 
-            url = (
-                self._url_base
-                + f"SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage"
-                + f"&format=image/tiff&geotiff:compression={self.compression}"
-                + f"&CRS={self._proj}"
-                + f"&coverageId={self.CoverageId}"
-                + f"&subset=time({dt})"
-            )
-            if self.bbox is None:
-                self.bbox = self.max_bbox
-            url = (
-                url
-                + f"&subset=long({self.bbox[0]},{self.bbox[2]})"
-                + f"&subset=lat({self.bbox[1]},{self.bbox[3]})"
-            )
-            if self.title_with_height:
-                url += "&subset=height(2)"
+            url = self._create_get_coverage_url(dt)
 
             valid_data = False
             trial = 0
@@ -266,18 +250,12 @@ class Fetcher:
                             sleep(self._sleep_time)
                 try:
                     with rio.open(r) as dataset:
-                        assert dataset.count == 1
                         if not got_grid:
                             meta_data["width"] = dataset.width
                             meta_data["height"] = dataset.height
                             meta_data["bounds"] = dataset.bounds
-                        else:
-                            assert meta_data["width"] == dataset.width
-                            assert meta_data["height"] == dataset.height
-                            assert meta_data["bounds"] == dataset.bounds
-                        valid_data = True
-
                         arrays.append(dataset.read(1)[::-1, :])
+                        valid_data = True
                 except:
                     pass
 
@@ -481,6 +459,28 @@ class Fetcher:
             or (lat >= self.max_bbox[3])
         ):
             raise ValueError(f"Point ({lon}, {lat}) is outside the model domain")
+
+    def _create_get_coverage_url(self, dt: str) -> str:
+
+        url = (
+            self._url_base
+            + f"SERVICE=WCS&VERSION={self._WCS_version}&REQUEST=GetCoverage"
+            + f"&format=image/tiff&geotiff:compression={self.compression}"
+            + f"&CRS={self._proj}"
+            + f"&coverageId={self.CoverageId}"
+            + f"&subset=time({dt})"
+        )
+        if self.bbox is None:
+            self.bbox = self.max_bbox
+        url = (
+            url
+            + f"&subset=long({self.bbox[0]},{self.bbox[2]})"
+            + f"&subset=lat({self.bbox[1]},{self.bbox[3]})"
+        )
+        if self.title_with_height:
+            url += "&subset=height(2)"
+
+        return url
 
     # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
