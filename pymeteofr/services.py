@@ -10,11 +10,13 @@ frequency
 - all times are UTC
 - coords are expressed in WGS84 (EPSG:4326) CRS
 """
+import os
 from json import load
 from datetime import datetime, timedelta
 from typing import List
 import urllib
 from time import sleep
+from pathlib import Path
 
 import xmltodict
 import requests
@@ -292,10 +294,14 @@ class Fetcher:
         self,
         n_levels: int = 40,
         cmap: str = "jet",
-        root_name: str = "movie",
+        root_name: str = "image",
+        tmp_dir_name: str = "data",
         dpi: int = 100,
     ) -> None:
-        # create temp data dir if nit does not exist
+
+        # create temp data dir if not exists
+        Path(tmp_dir_name).mkdir(parents=True, exist_ok=True)
+
         X, Y = np.meshgrid(self.data["x"], self.data["y"])
         array = self.data.values
         mean = np.mean(array[np.where(array < 9999)])
@@ -308,7 +314,8 @@ class Fetcher:
             ax.set_title(self.data["dt"].values[i])
             cbar = fig.colorbar(CS)
             cbar.ax.set_ylabel(self.title)
-            plt.savefig(f"{root_name}_{str(i).zfill(2)}.png", dpi=dpi)
+            file_path = os.path.join(tmp_dir_name, f"{root_name}_{str(i).zfill(2)}.png")
+            plt.savefig(file_path, dpi=dpi)
             plt.close()
 
     # ==========
