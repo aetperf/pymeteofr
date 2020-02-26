@@ -25,6 +25,7 @@ import pandas as pd
 import rasterio as rio
 import xarray as xr
 from matplotlib import pyplot as plt
+import imageio
 
 
 class Fetcher:
@@ -294,10 +295,14 @@ class Fetcher:
         self,
         n_levels: int = 40,
         cmap: str = "jet",
-        root_name: str = "image",
+        root_name: str = "movie",
         tmp_dir_name: str = "data",
         dpi: int = 100,
+        duration: float = 0.2,
     ) -> None:
+        """
+        Create an animated gif from currently stored 3D array (self.data).
+        """
 
         # create temp data dir if not exists
         Path(tmp_dir_name).mkdir(parents=True, exist_ok=True)
@@ -308,6 +313,7 @@ class Fetcher:
         array = np.where(array == 9999.0, mean, array)
         mini, maxi = np.min(array), np.max(array)
         levels = np.linspace(mini, maxi, n_levels + 2)[1:-1]
+        file_paths = []
         for i in range(array.shape[2]):
             fig, ax = plt.subplots(figsize=(15, 7))
             CS = ax.contourf(X, Y, array[:, :, i], levels=levels, cmap=cmap)
@@ -315,8 +321,14 @@ class Fetcher:
             cbar = fig.colorbar(CS)
             cbar.ax.set_ylabel(self.title)
             file_path = os.path.join(tmp_dir_name, f"{root_name}_{str(i).zfill(2)}.png")
+            file_paths.append(file_path)
             plt.savefig(file_path, dpi=dpi)
             plt.close()
+        images = []
+        for file_path in file_paths:
+            images.append(imageio.imread(file_path))
+        movie_file_path = os.path.join(tmp_dir_name, root_name + ".gif")
+        imageio.mimsave(movie_file_path, images, duration=duration)
 
     # ==========
 
