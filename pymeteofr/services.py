@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 import rasterio as rio
 import xarray as xr
+import matplotlib as mpl
 from matplotlib import pyplot as plt
 import imageio
 
@@ -299,6 +300,7 @@ class Fetcher:
         tmp_dir_name: str = "data",
         dpi: int = 100,
         duration: float = 0.2,
+        figsize: (int, int) = (13, 7),
     ) -> None:
         """
         Create an animated gif from currently stored 3D array (self.data).
@@ -306,6 +308,12 @@ class Fetcher:
 
         # create temp data dir if not exists
         Path(tmp_dir_name).mkdir(parents=True, exist_ok=True)
+
+        # figure text size
+        mpl.rcParams.update({"xtick.labelsize": 16})
+        mpl.rcParams.update({"ytick.labelsize": 16})
+        mpl.rcParams.update({"axes.labelsize": 22})
+        mpl.rcParams.update({"axes.titlesize": 22})
 
         X, Y = np.meshgrid(self.data["x"], self.data["y"])
         array = self.data.values
@@ -315,11 +323,16 @@ class Fetcher:
         levels = np.linspace(mini, maxi, n_levels + 2)[1:-1]
         file_paths = []
         for i in range(array.shape[2]):
-            fig, ax = plt.subplots(figsize=(15, 7))
+            fig, ax = plt.subplots(figsize=figsize)
             CS = ax.contourf(X, Y, array[:, :, i], levels=levels, cmap=cmap)
-            ax.set_title(self.data["dt"].values[i])
+            dt_string = np.datetime_as_string(
+                self.data["dt"].values[i], unit="h", timezone="UTC"
+            )
+            ax.set_title(dt_string)
             cbar = fig.colorbar(CS)
             cbar.ax.set_ylabel(self.title)
+            ax.set_xlabel("Lon")
+            ax.set_ylabel("Lat")
             file_path = os.path.join(tmp_dir_name, f"{root_name}_{str(i).zfill(2)}.png")
             file_paths.append(file_path)
             plt.savefig(file_path, dpi=dpi)
