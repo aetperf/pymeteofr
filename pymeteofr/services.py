@@ -28,6 +28,8 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 import imageio
 from colorcet import palette
+import geopandas as gpd
+from shapely.geometry import Point, Polygon
 
 
 class Fetcher:
@@ -303,6 +305,7 @@ class Fetcher:
         duration: float = 0.2,
         figsize: (int, int) = (13, 7),
         fontsize: int = 18,
+        border_line: bool = False,
     ) -> None:
         """
         Create an animated gif from currently stored 3D array (self.data).
@@ -314,11 +317,26 @@ class Fetcher:
         cmap = mpl.colors.ListedColormap(palette[cc_cmap], name=cc_cmap)
 
         # figure text size
-        mpl.rcParams.update({"xtick.labelsize": fontsize - 2})
-        mpl.rcParams.update({"ytick.labelsize": fontsize - 2})
+        mpl.rcParams.update({"xtick.labelsize": fontsize - 6})
+        mpl.rcParams.update({"ytick.labelsize": fontsize - 6})
         mpl.rcParams.update({"axes.labelsize": fontsize})
         mpl.rcParams.update({"axes.titlesize": fontsize})
-        mpl.rcParams.update({"font.size": fontsize})
+        mpl.rcParams.update({"font.size": fontsize - 6})
+
+        if border_line:
+            world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
+            p1 = Point(self.bbox[0], self.bbox[1])
+            p2 = Point(self.bbox[2], self.bbox[1])
+            p3 = Point(self.bbox[2], self.bbox[3])
+            p4 = Point(self.bbox[0], self.bbox[3])
+            np1 = (p1.coords.xy[0][0], p1.coords.xy[1][0])
+            np2 = (p2.coords.xy[0][0], p2.coords.xy[1][0])
+            np3 = (p3.coords.xy[0][0], p3.coords.xy[1][0])
+            np4 = (p4.coords.xy[0][0], p4.coords.xy[1][0])
+            bb_polygon = Polygon([np1, np2, np3, np4])
+            bbox = gpd.GeoDataFrame(geometry=[bb_polygon])
+            bbox.crs = "EPSG:4326"
+            borders = gpd.overlay(world, bbox, how="intersection")
 
         X, Y = np.meshgrid(self.data["x"], self.data["y"])
         array = self.data.values
@@ -346,6 +364,10 @@ class Fetcher:
             ax.set_title(self.title)
             ax.set_xlabel("Lon")
             ax.set_ylabel("Lat")
+            if border_line:
+                borders.geometry.boundary.plot(
+                    ax=ax, color=None, edgecolor="k", linewidth=2, alpha=0.15
+                )
             file_path = os.path.join(tmp_dir_name, f"{root_name}_{str(i).zfill(2)}.png")
             file_paths.append(file_path)
             plt.savefig(file_path, dpi=dpi)
