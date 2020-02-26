@@ -27,6 +27,7 @@ import xarray as xr
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import imageio
+from colorcet import palette
 
 
 class Fetcher:
@@ -295,25 +296,29 @@ class Fetcher:
     def make_movie(
         self,
         n_levels: int = 40,
-        cmap: str = "jet",
+        cc_cmap: str = "rainbow",
         root_name: str = "movie",
         tmp_dir_name: str = "data",
         dpi: int = 100,
         duration: float = 0.2,
         figsize: (int, int) = (13, 7),
+        fontsize: int = 18,
     ) -> None:
         """
         Create an animated gif from currently stored 3D array (self.data).
         """
-
         # create temp data dir if not exists
         Path(tmp_dir_name).mkdir(parents=True, exist_ok=True)
 
+        # register the colorcet colormap
+        cmap = mpl.colors.ListedColormap(palette[cc_cmap], name=cc_cmap)
+
         # figure text size
-        mpl.rcParams.update({"xtick.labelsize": 16})
-        mpl.rcParams.update({"ytick.labelsize": 16})
-        mpl.rcParams.update({"axes.labelsize": 22})
-        mpl.rcParams.update({"axes.titlesize": 22})
+        mpl.rcParams.update({"xtick.labelsize": fontsize})
+        mpl.rcParams.update({"ytick.labelsize": fontsize})
+        mpl.rcParams.update({"axes.labelsize": fontsize})
+        mpl.rcParams.update({"axes.titlesize": fontsize})
+        mpl.rcParams.update({"font.size": fontsize})
 
         X, Y = np.meshgrid(self.data["x"], self.data["y"])
         array = self.data.values
@@ -328,9 +333,17 @@ class Fetcher:
             dt_string = np.datetime_as_string(
                 self.data["dt"].values[i], unit="h", timezone="UTC"
             )
-            ax.set_title(dt_string)
             cbar = fig.colorbar(CS)
-            cbar.ax.set_ylabel(self.title)
+            plt.text(
+                0.5,
+                0.95,
+                s=dt_string,
+                horizontalalignment="center",
+                verticalalignment="center",
+                transform=ax.transAxes,
+                alpha=0.6,
+            )
+            ax.set_title(self.title)
             ax.set_xlabel("Lon")
             ax.set_ylabel("Lat")
             file_path = os.path.join(tmp_dir_name, f"{root_name}_{str(i).zfill(2)}.png")
