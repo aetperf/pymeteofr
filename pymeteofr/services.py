@@ -294,16 +294,17 @@ class Fetcher:
         cmap: str = "jet",
         root_name: str = "movie",
         dpi: int = 100,
-    ):
+    ) -> None:
         # create temp data dir if nit does not exist
         X, Y = np.meshgrid(self.data["x"], self.data["y"])
         array = self.data.values
         mean = np.mean(array[np.where(array < 9999)])
         array = np.where(array == 9999.0, mean, array)
-        mini, maxi = int(np.floor(np.min(array))), int(np.ceil(np.max(array)))
+        mini, maxi = np.min(array), np.max(array)
+        levels = np.linspace(mini, maxi, n_levels + 2)[1:-1]
         for i in range(array.shape[2]):
             fig, ax = plt.subplots(figsize=(15, 7))
-            CS = ax.contourf(X, Y, array[:, :, i], levels=n_levels, cmap=cmap)
+            CS = ax.contourf(X, Y, array[:, :, i], levels=levels, cmap=cmap)
             ax.set_title(self.data["dt"].values[i])
             cbar = fig.colorbar(CS)
             cbar.ax.set_ylabel(self.title)
