@@ -201,20 +201,13 @@ class Fetcher:
         Set a bounding box of interest from corners coords.
         """
         if (lon_min >= lon_max) or (lat_min >= lat_max):
-            raise AttributeError(
+            raise ValueError(
                 f"min coord ({lon_min}, {lat_min})"
                 + f" should be smaller than max ({lon_max}, {lat_max})"
             )
         self._check_coords_in_domain(lon_min, lat_min)
         self._check_coords_in_domain(lon_max, lat_max)
         self.bbox = (lon_min, lat_min, lon_max, lat_max)
-
-    def reset_bbox(self) -> None:
-        """
-        Reset to None the bounding box, which is equivalent to use the maximum 
-        bounding box (the one from the product spatial coverage).
-        """
-        self.bbox = None
 
     def create_3D_array(self) -> None:
         """
@@ -258,11 +251,9 @@ class Fetcher:
                         valid_data = True
                 except:
                     pass
-
         array = np.dstack(arrays)
-        dts = [datetime.strptime(dt, "%Y-%m-%dT%H:%M:%SZ") for dt in self.requested_dts]
 
-        bounds = meta_data["bounds"]
+        dts = [datetime.strptime(dt, "%Y-%m-%dT%H:%M:%SZ") for dt in self.requested_dts]
         x = np.linspace(
             meta_data["bounds"].left, meta_data["bounds"].right, meta_data["width"]
         )
