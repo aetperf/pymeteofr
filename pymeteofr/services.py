@@ -235,14 +235,13 @@ class Fetcher:
                 + f"&coverageId={self.CoverageId}"
                 + f"&subset=time({dt})"
             )
-            if self.bbox is not None:
-                url = (
-                    url
-                    + f"&subset=long({self.bbox[0]},{self.bbox[2]})"
-                    + f"&subset=lat({self.bbox[1]},{self.bbox[3]})"
-                )
-            else:
+            if self.bbox is None:
                 self.bbox = self.max_bbox
+            url = (
+                url
+                + f"&subset=long({self.bbox[0]},{self.bbox[2]})"
+                + f"&subset=lat({self.bbox[1]},{self.bbox[3]})"
+            )
             if self.title_with_height:
                 url += "&subset=height(2)"
 
@@ -277,6 +276,7 @@ class Fetcher:
                             assert meta_data["height"] == dataset.height
                             assert meta_data["bounds"] == dataset.bounds
                         valid_data = True
+
                         arrays.append(dataset.read(1)[::-1, :])
                 except:
                     pass
