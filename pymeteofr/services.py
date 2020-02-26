@@ -508,15 +508,23 @@ class Describer:
         request.
         """
         url = self._build_url()
-        print("-- DescribeCoverage request --")
-        r = requests.get(url)
-        xmlData = r.content.decode("utf-8")
-        d = xmltodict.parse(xmlData, process_namespaces=True)
-        description = d["http://www.opengis.net/wcs/2.0:CoverageDescriptions"][
-            "http://www.opengis.net/wcs/2.0:CoverageDescription"
-        ]["http://www.opengis.net/gml/3.2:boundedBy"][
-            "http://www.opengis.net/gml/3.2:EnvelopeWithTimePeriod"
-        ]
+
+        trial = 0
+        while trial < self.max_trials:
+            try:
+                print("-- DescribeCoverage request --")
+                r = requests.get(url)
+                xmlData = r.content.decode("utf-8")
+                d = xmltodict.parse(xmlData, process_namespaces=True)
+                description = d["http://www.opengis.net/wcs/2.0:CoverageDescriptions"][
+                    "http://www.opengis.net/wcs/2.0:CoverageDescription"
+                ]["http://www.opengis.net/gml/3.2:boundedBy"][
+                    "http://www.opengis.net/gml/3.2:EnvelopeWithTimePeriod"
+                ]
+                break
+            except KeyError:
+                sleep(self._sleep_time)
+
         self.axisLabels = description["@axisLabels"]
         self.uomLabels = description["@uomLabels"]
         self.srsDimension = description["@srsDimension"]
