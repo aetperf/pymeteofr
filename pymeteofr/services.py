@@ -91,7 +91,7 @@ class Fetcher:
         assert self.token[-2:] == "__"
 
     def select_product(
-        self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01
+        self, dataset: str = "", area: str = "", accuracy: float = 0.0
     ) -> None:
         """ 
         Select a weather product: model (AROME, ARPEGE, ...), 
