@@ -168,7 +168,7 @@ class Fetcher:
         Get spatial and temporal information about the selected CoverageId
         """
         describer = Describer(self._url_base, self.CoverageId, self._WCS_version)
-        describer.get_description()
+        describer.get_description(self.max_trials, self.sleep_time)
 
         # bounding box of the area covered
         self.max_bbox = describer.max_bbox
@@ -502,7 +502,7 @@ class Describer:
         )
         return url
 
-    def get_description(self) -> None:
+    def get_description(self, max_trials: int = 20, sleep_time: float = 0.5) -> None:
         """
         Retrieve the information found in the result of the DescribeCoverage 
         request.
@@ -510,7 +510,7 @@ class Describer:
         url = self._build_url()
 
         trial = 0
-        while trial < self.max_trials:
+        while trial < max_trials:
             try:
                 print("-- DescribeCoverage request --")
                 r = requests.get(url)
@@ -523,7 +523,7 @@ class Describer:
                 ]
                 break
             except KeyError:
-                sleep(self._sleep_time)
+                sleep(sleep_time)
 
         self.axisLabels = description["@axisLabels"]
         self.uomLabels = description["@uomLabels"]
