@@ -19,6 +19,8 @@ requirements = [
     "xarray",
     "imageio",
     "colorcet",
+    "geopandas",
+    "descartes",
 ]
 
 setup_requirements = []
