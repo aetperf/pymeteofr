@@ -16,7 +16,7 @@ fetcher.make_movie(root_name="tahiti")
 Image(filename="./data/tahiti.gif")
 ```
 <p align="center">
-  <img width="600" src="tahiti.gif" alt="tahiti.gif">
+  <img width="800" src="tahiti.gif" alt="tahiti.gif">
 </p>
 
 ## Requirements
