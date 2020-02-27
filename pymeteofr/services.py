@@ -30,6 +30,7 @@ import imageio
 from colorcet import palette
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
+from pygifsicle import optimize
 
 
 class Fetcher:
@@ -200,6 +201,10 @@ class Fetcher:
         """ 
         Set a bounding box of interest from corners coords.
         """
+
+        lon_min = self._convert_longitude(lon_min)
+        lon_max = self._convert_longitude(lon_max)
+
         if (lon_min >= lon_max) or (lat_min >= lat_max):
             raise ValueError(
                 f"min coord ({lon_min}, {lat_min})"
@@ -275,6 +280,7 @@ class Fetcher:
         figsize: (int, int) = (13, 7),
         fontsize: int = 18,
         border_line: bool = False,
+        optim: bool = True,
     ) -> None:
         """
         Create an animated gif from currently stored 3D array (self.data).
@@ -312,7 +318,7 @@ class Fetcher:
         mean = np.mean(array[np.where(array < 9999)])
         array = np.where(array == 9999.0, mean, array)
         mini, maxi = np.min(array), np.max(array)
-        levels = np.linspace(mini, maxi, n_levels + 2)[1:-1]
+        levels = np.linspace(np.floor(mini), np.ceil(maxi), n_levels)
         file_paths = []
         for i in range(array.shape[2]):
             fig, ax = plt.subplots(figsize=figsize)
@@ -347,6 +353,9 @@ class Fetcher:
         movie_file_path = os.path.join(tmp_dir_name, root_name + ".gif")
         imageio.mimsave(movie_file_path, images, duration=duration)
 
+        if optim:
+            optimize(movie_file_path)
+
     # ==========
 
     def _load_json_credentials(self, file_path: str = "") -> (str, str):
@@ -356,7 +365,7 @@ class Fetcher:
         return creds["username"], creds["password"]
 
     def _build_base_url(
-        self, dataset: str = "arome", area: str = "france", accuracy: float = 0.01,
+        self, dataset: str = "", area: str = "", accuracy: float = 0.0,
     ) -> None:
         dataset = dataset.lower()
         area = area.lower()
@@ -472,6 +481,13 @@ class Fetcher:
             url += "&subset=height(2)"
 
         return url
+
+    def _convert_longitude(self, lon: float) -> float:
+        while lon > 180.0:
+            lon -= 360.0
+        while lon < -180.0:
+            lon += 360.0
+        return lon
 
     # def set_poi(self, lon: float, lat: float) -> None:
     #     """ Set a point of interest from coords.
@@ -639,7 +655,7 @@ class ServiceOptionsChecker:
             self.choice = self.choice[self.choice.dataset == dataset]
 
         if len(area) > 0:
-            self.choice = self.choice[self.choice.area == area]
+            self.choice = self.choice[self.choice['area'] == area]
 
         if accuracy > 0.0:
             self.choice = self.choice[self.choice.accuracy == accuracy]
