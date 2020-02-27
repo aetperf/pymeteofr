@@ -21,7 +21,7 @@ Image(filename="./data/tahiti.gif")
 
 ## Requirements
 
-[gifsicle](https://www.lcdf.org/gifsicle/) is needed when gif files are optimized.
+[gifsicle](https://www.lcdf.org/gifsicle/) is required for the gif file optimization.
 
 
 Free software: MIT License
