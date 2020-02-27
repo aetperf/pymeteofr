@@ -15,16 +15,13 @@ fetcher.create_3D_array()
 fetcher.make_movie(root_name="tahiti")
 Image(filename="./data/tahiti.gif")
 ```
-!["tahiti.gif"](tahiti.gif "Tahiti temperature forecast")
+<p align="center">
+  <img width="600" src="tahiti.gif" alt="tahiti.gif">
+</p>
 
 ## Requirements
 
 [gifsicle](https://www.lcdf.org/gifsicle/) is needed when gif files are optimized.
-
-
-## Features
-
-TODO
 
 
 Free software: MIT License
