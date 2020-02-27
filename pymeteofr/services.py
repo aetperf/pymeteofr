@@ -271,7 +271,7 @@ class Fetcher:
         root_name: str = "movie",
         tmp_dir_name: str = "data",
         dpi: int = 100,
-        duration: float = 0.2,
+        duration: float = 0.333,
         figsize: (int, int) = (13, 7),
         fontsize: int = 18,
         border_line: bool = False,
