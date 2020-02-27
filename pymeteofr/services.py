@@ -46,7 +46,7 @@ class Fetcher:
         self._proj = "EPSG:4326"  # The only supported projection
         self.compression = "DEFLATE"  # tiff compression : PACKBITS, LZW, JPEG, DEFLATE
         self.max_trials = 20  # maximum number of trials of the same request
-        self._sleep_time = 1.0  # seconds to wait before retrying a request
+        self.sleep_time = 1.0  # seconds to wait before retrying a request
 
         self.bbox = None
         self._url_base = ""
@@ -232,7 +232,7 @@ class Fetcher:
                     r = urllib.request.urlopen(url)
                     fetched_dt = True
                 except:
-                    sleep(self._sleep_time)
+                    sleep(self.sleep_time)
                     while (not fetched_dt) & (trial < self.max_trials):
                         trial += 1
                         print(f"-- GetCoverage request {dt} --")
@@ -240,7 +240,7 @@ class Fetcher:
                             r = urllib.request.urlopen(url)
                             fetched_dt = True
                         except:
-                            sleep(self._sleep_time)
+                            sleep(self.sleep_time)
                 try:
                     with rio.open(r) as dataset:
                         if not got_grid:
@@ -397,7 +397,7 @@ class Fetcher:
                 )
                 break
             except KeyError:
-                sleep(self._sleep_time)
+                sleep(self.sleep_time)
 
         self._capa_1H = capa[capa.run_time_suffix == ""].copy(deep=True)
         self._capa_1H.drop("run_time_suffix", axis=1, inplace=True)
