@@ -655,7 +655,7 @@ class ServiceOptionsChecker:
             self.choice = self.choice[self.choice.dataset == dataset]
 
         if len(area) > 0:
-            self.choice = self.choice[self.choice['area'] == area]
+            self.choice = self.choice[self.choice["area"] == area]
 
         if accuracy > 0.0:
             self.choice = self.choice[self.choice.accuracy == accuracy]
