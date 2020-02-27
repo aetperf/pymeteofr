@@ -32,6 +32,8 @@ import geopandas as gpd
 from shapely.geometry import Point, Polygon
 from pygifsicle import optimize
 
+Vector = List[float]
+
 
 class Fetcher:
     """ 
@@ -48,8 +50,10 @@ class Fetcher:
         self.compression = "DEFLATE"  # tiff compression : PACKBITS, LZW, JPEG, DEFLATE
         self.max_trials = 20  # maximum number of trials of the same request
         self.sleep_time = 1.0  # seconds to wait before retrying a request
+        self._bbox_margin = 0.5  # degrees
 
         self.bbox = None
+        self.pois = None
         self._url_base = ""
         self._CoverageId = ""
 
@@ -489,13 +493,45 @@ class Fetcher:
             lon += 360.0
         return lon
 
-    # def set_poi(self, lon: float, lat: float) -> None:
-    #     """ Set a point of interest from coords.
-    #     """
-    #     self._check_coords_in_domain(lon, lat)
-    #     self.poi = {"lon": lon, "lat": lat}
-    #     margin = 0.02
-    #     self.set_bboxoi(lon - margin, lon + margin, lat - margin, lat + margin)
+    def set_poi(self, lon: float, lat: float) -> None:
+        """ Set a point of interest from coords.
+        """
+        self._check_coords_in_domain(lon, lat)
+        self.pois = [(lon, lat)]
+
+        lon_min = np.max([lon - self._bbox_margin, self.max_bbox[0]])
+        lat_min = np.max([lat - self._bbox_margin, self.max_bbox[1]])
+        lon_max = np.min([lon + self._bbox_margin, self.max_bbox[2]])
+        lat_max = np.min([lat + self._bbox_margin, self.max_bbox[3]])
+
+        self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
+
+    def set_pois(self, lons: Vector, lats: Vector) -> None:
+        """ Set points of interest from coords.
+        """
+        n_pois = len(lons)
+
+        if len(lons) != len(lats):
+            raise ValueError(f"{len(lons)} longitudes for {len(lats)} latitudes")
+
+        for lon, lat in zip(lons, lats):
+            self._check_coords_in_domain(lon, lat)
+
+        self.pois = []
+        for lon, lat in zip(lons, lats):
+            self.pois.append((lon, lat))
+
+        min_lons = np.min(lons)
+        min_lats = np.min(lats)
+        max_lons = np.max(lons)
+        max_lats = np.min(lats)
+
+        lon_min = np.max([min_lons - self._bbox_margin, self.max_bbox[0]])
+        lat_min = np.max([min_lats - self._bbox_margin, self.max_bbox[1]])
+        lon_max = np.min([max_lons + self._bbox_margin, self.max_bbox[2]])
+        lat_max = np.min([max_lats + self._bbox_margin, self.max_bbox[3]])
+
+        self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
 
 
 class Describer:
