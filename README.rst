@@ -16,7 +16,10 @@ PyMeteoFr
 
 Python wrapper of the meteo-france web services (only the OGC Web Coverage Service (WCS)).
 
-* Free software: MIT license
+* Free software: MIT License
+
+Copyright (c) 2020, Architecture & Performance
+
 ..
   * Documentation: https://pymeteofr.readthedocs.io.
 
