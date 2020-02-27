@@ -7,7 +7,7 @@ from IPython.display import Image
 from pymeteofr import Fetcher
 
 fetcher = Fetcher(token="__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx__")
-fetcher.select_product(dataset='arome', area='réuinion')
+fetcher.select_product(dataset='arome', area='polynésie')
 fetcher.select_coverage_id("Temperature at specified height level above ground")
 fetcher.check_run_time(horizon=24)
 fetcher.set_bbox_of_interest(208, -18.5, 212, -16)
