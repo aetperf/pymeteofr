@@ -296,7 +296,7 @@ class Fetcher:
         mpl.rcParams.update({"ytick.labelsize": fontsize - 6})
         mpl.rcParams.update({"axes.labelsize": fontsize})
         mpl.rcParams.update({"axes.titlesize": fontsize})
-        mpl.rcParams.update({"font.size": fontsize - 6})
+        mpl.rcParams.update({"font.size": fontsize - 4})
 
         if border_line:
             world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
