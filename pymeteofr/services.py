@@ -32,7 +32,8 @@ import geopandas as gpd
 from shapely.geometry import Point, Polygon
 from pygifsicle import optimize
 
-Vector = List[float]
+Vector_float = List[float]
+Vector_str = List[str]
 
 
 class Fetcher:
@@ -506,11 +507,11 @@ class Fetcher:
             lon += 360.0
         return lon
 
-    def set_poi(self, lon: float, lat: float) -> None:
+    def set_poi(self, name: str, lon: float, lat: float) -> None:
         """ Set a point of interest from coords.
         """
         self._check_coords_in_domain(lon, lat)
-        self.pois = [(lon, lat)]
+        self.pois = [(name, lon, lat)]
 
         lon_min = np.max([lon - self._bbox_margin, self.max_bbox[0]])
         lat_min = np.max([lat - self._bbox_margin, self.max_bbox[1]])
@@ -519,14 +520,18 @@ class Fetcher:
 
         self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
 
-    def set_pois(self, lons: Vector, lats: Vector) -> None:
-        """ Set points of interest from coords.
+    def set_pois(self, names: Vector_str, lons: Vector_float, lats: Vector_float) -> None:
+        """ 
+        Set points of interest from coords.
         """
         n_pois = len(lons)
 
         if len(lons) != len(lats):
             raise ValueError(
-                f"{len(lons)} longitude(s) but {len(lats)} latitude(s) given"
+                "Input variable lengths do not match:"
+                + f"{len(lons)} POI longitude(s)"
+                + f"{len(lats)} POI latitude(s)"
+                + f"{len(names)} POI names"
             )
 
         for lon, lat in zip(lons, lats):
