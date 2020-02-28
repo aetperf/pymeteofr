@@ -420,8 +420,6 @@ class Fetcher:
 
         x = self.data["x"].values
         y = self.data["y"].values
-        print("x", x.shape)
-        print("y", y.shape)
 
         dts = []
         values = {}
