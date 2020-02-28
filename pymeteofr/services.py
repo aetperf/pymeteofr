@@ -31,6 +31,7 @@ from colorcet import palette
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
 from pygifsicle import optimize
+from scipy import interpolate
 
 Vector_float = List[float]
 Vector_str = List[str]
@@ -408,18 +409,37 @@ class Fetcher:
 
         self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
 
-    def create_time_series(self) -> None:
+    def create_time_series(self, interp: str = "linear") -> None:
         """
         Fetch a 3D array and create a time serie for each POI given.
+
+        interpolation kinds:  linear, cubic, quintic
         """
         self.create_3D_array()
         array = self.data.values
+
+        x = self.data["x"].values
+        y = self.data["y"].values
+        print("x", x.shape)
+        print("y", y.shape)
+
         dts = []
+        values = {}
+        for item in self.pois:
+            name = item[0]
+            values[name] = []
+
         for i in range(array.shape[2]):
             dt = self.data["dt"].values[i]
             dts.append(dt)
+            f = interpolate.interp2d(x, y, self.data.values[:, :, i], kind=interp)
+            for item in self.pois:
+                name, lon, lat = item
+                val = f(lon, lat)[0]
+                values[name].append(val)
         dt_index = pd.date_range(start=dts[0], end=dts[-1], freq="H")
-        print(dt_index)
+
+        self.df = pd.DataFrame(values, index=dt_index)
 
     # ==========
 
