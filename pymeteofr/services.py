@@ -361,6 +361,53 @@ class Fetcher:
         if optim:
             optimize(movie_file_path)
 
+    def set_poi(self, name: str, lon: float, lat: float) -> None:
+        """ 
+        Set a point of interest from coords.
+        """
+        self._check_coords_in_domain(lon, lat)
+        self.pois = [(name, lon, lat)]
+
+        lon_min = np.max([lon - self._bbox_margin, self.max_bbox[0]])
+        lat_min = np.max([lat - self._bbox_margin, self.max_bbox[1]])
+        lon_max = np.min([lon + self._bbox_margin, self.max_bbox[2]])
+        lat_max = np.min([lat + self._bbox_margin, self.max_bbox[3]])
+
+        self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
+
+    def set_pois(self, names: Vector_str, lons: Vector_float, lats: Vector_float) -> None:
+        """ 
+        Set points of interest from coords.
+        """
+        n_pois = len(lons)
+
+        if (len(lons) != len(lats)) or (len(lons) != len(names)):
+            raise ValueError(
+                "Input variable lengths do not match : "
+                + f"{len(lons)} POI longitude(s)"
+                + f"{len(lats)} POI latitude(s)"
+                + f"{len(names)} POI names"
+            )
+
+        for lon, lat in zip(lons, lats):
+            self._check_coords_in_domain(lon, lat)
+
+        self.pois = []
+        for name, lon, lat in zip(names, lons, lats):
+            self.pois.append((name, lon, lat))
+
+        min_lons = np.min(lons)
+        min_lats = np.min(lats)
+        max_lons = np.max(lons)
+        max_lats = np.min(lats)
+
+        lon_min = np.max([min_lons - self._bbox_margin, self.max_bbox[0]])
+        lat_min = np.max([min_lats - self._bbox_margin, self.max_bbox[1]])
+        lon_max = np.min([max_lons + self._bbox_margin, self.max_bbox[2]])
+        lat_max = np.min([max_lats + self._bbox_margin, self.max_bbox[3]])
+
+        self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
+
     def create_time_series(self) -> None:
         """
         Fetch a 3D array and create a time serie for each POI given.
@@ -506,52 +553,6 @@ class Fetcher:
         while lon < -180.0:
             lon += 360.0
         return lon
-
-    def set_poi(self, name: str, lon: float, lat: float) -> None:
-        """ Set a point of interest from coords.
-        """
-        self._check_coords_in_domain(lon, lat)
-        self.pois = [(name, lon, lat)]
-
-        lon_min = np.max([lon - self._bbox_margin, self.max_bbox[0]])
-        lat_min = np.max([lat - self._bbox_margin, self.max_bbox[1]])
-        lon_max = np.min([lon + self._bbox_margin, self.max_bbox[2]])
-        lat_max = np.min([lat + self._bbox_margin, self.max_bbox[3]])
-
-        self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
-
-    def set_pois(self, names: Vector_str, lons: Vector_float, lats: Vector_float) -> None:
-        """ 
-        Set points of interest from coords.
-        """
-        n_pois = len(lons)
-
-        if len(lons) != len(lats):
-            raise ValueError(
-                "Input variable lengths do not match:"
-                + f"{len(lons)} POI longitude(s)"
-                + f"{len(lats)} POI latitude(s)"
-                + f"{len(names)} POI names"
-            )
-
-        for lon, lat in zip(lons, lats):
-            self._check_coords_in_domain(lon, lat)
-
-        self.pois = []
-        for lon, lat in zip(lons, lats):
-            self.pois.append((lon, lat))
-
-        min_lons = np.min(lons)
-        min_lats = np.min(lats)
-        max_lons = np.max(lons)
-        max_lats = np.min(lats)
-
-        lon_min = np.max([min_lons - self._bbox_margin, self.max_bbox[0]])
-        lat_min = np.max([min_lats - self._bbox_margin, self.max_bbox[1]])
-        lon_max = np.min([max_lons + self._bbox_margin, self.max_bbox[2]])
-        lat_max = np.min([max_lats + self._bbox_margin, self.max_bbox[3]])
-
-        self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
 
 
 class Describer:
