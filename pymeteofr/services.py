@@ -360,6 +360,19 @@ class Fetcher:
         if optim:
             optimize(movie_file_path)
 
+    def create_time_series(self) -> None:
+        """
+        Fetch a 3D array and create a time serie for each POI given.
+        """
+        self.create_3D_array()
+        array = self.data.values
+        dts = []
+        for i in range(array.shape[2]):
+            dt = self.data["dt"].values[i]
+            dts.append(dt)
+        dt_index = pd.date_range(start=dts[0], end=dts[-1], freq="H")
+        print(dt_index)
+
     # ==========
 
     def _load_json_credentials(self, file_path: str = "") -> (str, str):
@@ -512,7 +525,9 @@ class Fetcher:
         n_pois = len(lons)
 
         if len(lons) != len(lats):
-            raise ValueError(f"{len(lons)} longitudes for {len(lats)} latitudes")
+            raise ValueError(
+                f"{len(lons)} longitude(s) but {len(lats)} latitude(s) given"
+            )
 
         for lon, lat in zip(lons, lats):
             self._check_coords_in_domain(lon, lat)
