@@ -400,7 +400,7 @@ class Fetcher:
         min_lons = np.min(lons)
         min_lats = np.min(lats)
         max_lons = np.max(lons)
-        max_lats = np.min(lats)
+        max_lats = np.max(lats)
 
         lon_min = np.max([min_lons - self._bbox_margin, self.max_bbox[0]])
         lat_min = np.max([min_lats - self._bbox_margin, self.max_bbox[1]])
@@ -430,14 +430,14 @@ class Fetcher:
         for i in range(array.shape[2]):
             dt = self.data["dt"].values[i]
             dts.append(dt)
-            f = interpolate.interp2d(x, y, self.data.values[:, :, i], kind=interp)
+            f = interpolate.interp2d(x, y, array[:, :, i], kind=interp)
             for item in self.pois:
                 name, lon, lat = item
                 val = f(lon, lat)[0]
                 values[name].append(val)
         dt_index = pd.date_range(start=dts[0], end=dts[-1], freq="H")
 
-        self.df = pd.DataFrame(values, index=dt_index)
+        self.series = pd.DataFrame(values, index=dt_index)
 
     # ==========
 
