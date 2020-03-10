@@ -1,3 +1,6 @@
+
+[![Build Status](https://travis-ci.org/aetperf/pymeteofr.svg?branch=master)](https://travis-ci.org/aetperf/pymeteofr)
+
 # PyMeteoFr
 
 Python wrapper of the meteo-france web services ([WCS](https://www.ogc.org/standards/wcs) only).
