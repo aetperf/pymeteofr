@@ -409,7 +409,7 @@ class Fetcher:
 
         self.set_bbox_of_interest(lon_min, lat_min, lon_max, lat_max)
 
-    def create_time_series(self, interp: str = "linear") -> None:
+    def create_time_series(self, interp: str = "quintic") -> None:
         """
         Fetch a 3D array and create a time serie for each POI given.
 
