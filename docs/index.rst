@@ -1,4 +1,4 @@
-Welcome to PyInspire's documentation!
+Welcome to PyMeteoFr's documentation!
 ======================================
 
 .. toctree::

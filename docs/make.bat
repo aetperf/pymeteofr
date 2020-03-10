@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=pyinspire
+set SPHINXPROJ=pymeteofr
 
 if "%1" == "" goto help
 

@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use PyInspire in a project::
+To use PyMeteoFr in a project::
 
-    import pyinspire
+    import pymeteofr

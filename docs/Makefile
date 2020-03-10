@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = pyinspire
+SPHINXPROJ    = pymeteofr
 SOURCEDIR     = .
 BUILDDIR      = _build
 
