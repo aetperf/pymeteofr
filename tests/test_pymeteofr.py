@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-"""Tests for `pyinspire` package."""
+"""Tests for `pymeteofr` package."""
 
 
 import unittest
 
-from pyinspire import pyinspire
+from pymeteofr import Fetcher
 
 
 class TestPyinspire(unittest.TestCase):
@@ -19,3 +19,4 @@ class TestPyinspire(unittest.TestCase):
 
     def test_000_something(self):
         """Test something."""
+        assert True
