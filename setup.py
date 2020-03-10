@@ -31,7 +31,7 @@ test_requirements = []
 setup(
     author="Francois Pacull",
     author_email="francois.pacull@architecture-performance.fr",
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
@@ -56,4 +56,5 @@ setup(
     url="https://github.com/djfrancesco/pymeteofr",
     version="0.1.0",
     zip_safe=False,
+    extras_require={"docs": ["sphinx >= 1.8", "xmltodict"]},
 )
