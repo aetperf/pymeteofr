@@ -6,10 +6,8 @@ Welcome to PyMeteoFr's documentation!
    :caption: Contents:
 
    overview
-   access
    installation
    usage
-   modules
    contributing
    authors
    history
@@ -17,5 +15,4 @@ Welcome to PyMeteoFr's documentation!
 Indices and tables
 ==================
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
