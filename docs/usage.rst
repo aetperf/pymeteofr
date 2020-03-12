@@ -17,7 +17,7 @@ First you need to import the ``Fetcher`` class:
 
     from pymeteofr import Fetcher
 
-Then you can instanciate a ``Fetcher`` object without a token:
+You can instanciate a ``Fetcher`` object without a token:
 
 .. code:: ipython3
 
@@ -38,7 +38,7 @@ the form:
        "password": "1234"
    }
 
-This is done with the ``credentials_file_path`` argument and by calling the ``fetch_token`` method:
+This is done with the ``credentials_file_path`` argument of the ``fetch_token`` method:
 
 .. code:: ipython3
 
@@ -57,6 +57,8 @@ Or by directly giving a username and password:
 .. parsed-literal::
 
     -- GetAPIKey request --
+
+These username and password are the ones you got from support.inspire@meteo.fr. PyMeteoFr is using a ``GetAPIKey`` request to fetch the token. Note that if you give a wrong username/password, you still fetch a token from the web service, which is not going to be valid.
 
 Finally the token can be directly given as an argument when instanciating the ``Fetcher`` object:
 
