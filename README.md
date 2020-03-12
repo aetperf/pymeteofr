@@ -1,6 +1,7 @@
 
 [![Build Status](https://travis-ci.org/aetperf/pymeteofr.svg?branch=master)](https://travis-ci.org/aetperf/pymeteofr)
 [![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://pymeteofr.readthedocs.io/en/latest/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 # PyMeteoFr
 
