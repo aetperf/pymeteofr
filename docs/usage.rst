@@ -155,7 +155,7 @@ Now that the token is set, we need to choose which weather-related product we ar
     </table>
     </div>
 
-Note that we do not need to enter all the arguments, but just give enough information to select a single product. In the following example, we select two products:
+Note that we do not need to enter all the arguments, but just give enough information to select a single product. In the following example, we select two products instead of one, which raises an error:
 
 .. code:: ipython3
 
@@ -171,7 +171,7 @@ Note that we do not need to enter all the arguments, but just give enough inform
     3   arome  france     0.010          wcs
     Several services match the criteria
 
-In this other example, no product match the criteria:
+In this other example, no product matches the given criteria:
 
 .. code:: ipython3
 
@@ -223,7 +223,9 @@ and the list of available run times (we will see more about that in the next sec
 Selecting a CoverageId
 ======================
 
-A CoverageId is a combination of ``title`` and ``run_time``. The ``title`` is a variable (e.g. temperature, presure) resulting from a model and a ``run_time`` is a time stamp identifying when the model was run. So when we select a ``CoverageId`` we can enter a ``title`` and ``run_time`` as attributes to the ``select_coverage_id`` method. Actually, the ``title`` is mandatory but not the ``run_time``. If not entered, the latest available ``run_time`` is chosen. Let us choose for example the 'Pressure' ``title``:
+A CoverageId is a combination of ``title`` and ``run_time``. The ``title`` is a variable (e.g. temperature, presure) resulting from a model and a ``run_time`` is a time stamp identifying when the model was run. 
+
+So when we select a ``CoverageId`` we can enter the ``title`` and ``run_time`` as attributes to the ``select_coverage_id`` method. Actually, the ``title`` is mandatory but not the ``run_time``. If not entered, the latest available ``run_time`` is chosen. Let us choose for example the 'Pressure' ``title``:
 
 .. code:: ipython3
 
@@ -234,7 +236,7 @@ A CoverageId is a combination of ``title`` and ``run_time``. The ``title`` is a 
 
     'PRESSURE__GROUND_OR_WATER_SURFACE___2020-02-27T09.00.00Z'
 
-The ``run_time`` information as well as the list of ``titles`` is re-built at each ``GetCapabilities`` request, for example when we select a product. However we can refresh this information with the ``update`` method:
+The ``run_time`` information as well as the list of ``titles`` is re-built at each ``GetCapabilities`` request, for example when we select a product. However we can simply refresh this information with the ``update`` method:
 
 .. code:: ipython3
 
@@ -243,7 +245,7 @@ The ``run_time`` information as well as the list of ``titles`` is re-built at ea
 .. parsed-literal::
     -- GetCapabilities request --
 
-This can be useful for exemple if several hours have passed since a product was chosen. Now what if we want to look at the list of available run times? This is done using the ``list_available_run_times`` method:
+This can be useful for example if several hours have passed since a product was chosen. Now what if we want to look at the list of available run times? This is done using the ``list_available_run_times`` method:
 
 .. code:: ipython3
 
