@@ -6,7 +6,7 @@
 
 # PyMeteoFr
 
-Python wrapper of the meteo-france web services ([WCS](https://www.ogc.org/standards/wcs) only).
+Python wrapper of the Météo-France web services ([WCS](https://www.ogc.org/standards/wcs) only).
 
 ```python
 from IPython.display import Image
