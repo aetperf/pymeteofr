@@ -343,7 +343,7 @@ This is a bounding box expressed in WGS84 (EPSG:4326) CRS. However the computati
    :scale: 50 %
    :align: center
 
-Note that when the run time is fairly new, all the time steps are not available, they are progressively being pushed to the web service. So there is some chance that the latest run time is not complete. This is why we created the ``check_run_time`` method. The argument is the horizon of the forecasts, expressed in hours, that you want. Suppose that you are interested in the next 24 hours, starting from now:
+Note that when the run time is fairly new, all the time steps are not available yet: they are progressively being pushed to the web service. So there is some chance that the latest run time is not complete. This is why we created the ``check_run_time`` method. The argument is the horizon of the forecasts, expressed in hours, that you want. Suppose that you are interested in the next 24 hours, starting from now:
 
 .. code:: ipython3
 
