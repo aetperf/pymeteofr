@@ -220,6 +220,9 @@ This triggers a ``GetCapabilities`` request which returns some information about
 
 and the list of available run times (we will see more about that in the next section). Note that this list of titles depends on the chosen product.
 
+An important point is that we only keep the titles that are available with a temporal resolution of 1 hour. Other titles are discarded.
+
+
 Selecting a CoverageId
 ======================
 
@@ -277,3 +280,79 @@ The ``Fetcher`` object also has a ``run_time`` attribute:
 
 	'2020-02-23T03.00.00Z'
 
+Describing a CoverageId
+=======================
+
+Now that we selected a CoverageId, which corresponds to a run of a model, we need to know what's inside in terms of spatial and temporal coverage. This is why we have a ``describe`` method, which uses a ``DescribeCoverage`` request to fetch the maximum bounding box, and the available time steps of the simulation results.
+
+.. code:: ipython3
+
+    fetcher.describe()
+
+.. parsed-literal::
+
+    -- DescribeCoverage request --
+
+We can then have a list of the available time steps at the time of the request with the ``dts`` attribute:
+
+.. code:: ipython3
+
+    fetcher.dts
+
+.. parsed-literal::
+
+    DatetimeIndex(['2020-03-13 06:00:00', '2020-03-13 07:00:00',
+                   '2020-03-13 08:00:00', '2020-03-13 09:00:00',
+                   '2020-03-13 10:00:00', '2020-03-13 11:00:00',
+                   '2020-03-13 12:00:00', '2020-03-13 13:00:00',
+                   '2020-03-13 14:00:00', '2020-03-13 15:00:00',
+                   '2020-03-13 16:00:00', '2020-03-13 17:00:00',
+                   '2020-03-13 18:00:00', '2020-03-13 19:00:00',
+                   '2020-03-13 20:00:00', '2020-03-13 21:00:00',
+                   '2020-03-13 22:00:00', '2020-03-13 23:00:00',
+                   '2020-03-14 00:00:00', '2020-03-14 01:00:00',
+                   '2020-03-14 02:00:00', '2020-03-14 03:00:00',
+                   '2020-03-14 04:00:00', '2020-03-14 05:00:00',
+                   '2020-03-14 06:00:00', '2020-03-14 07:00:00',
+                   '2020-03-14 08:00:00', '2020-03-14 09:00:00',
+                   '2020-03-14 10:00:00', '2020-03-14 11:00:00',
+                   '2020-03-14 12:00:00', '2020-03-14 13:00:00',
+                   '2020-03-14 14:00:00', '2020-03-14 15:00:00',
+                   '2020-03-14 16:00:00', '2020-03-14 17:00:00',
+                   '2020-03-14 18:00:00', '2020-03-14 19:00:00',
+                   '2020-03-14 20:00:00', '2020-03-14 21:00:00',
+                   '2020-03-14 22:00:00', '2020-03-14 23:00:00',
+                   '2020-03-15 00:00:00'],
+                  dtype='datetime64[ns]', freq='H')
+
+
+While the spatial coverage is given by the ``max_bbox`` attribute:
+
+.. code:: ipython3
+
+    fetcher.max_bbox
+
+.. parsed-literal::
+
+    (-12.0, 37.5, 16.0, 55.4)
+
+This is a bounding box expressed in WGS84 (EPSG:4326) CRS. However the computation uses a different CRS, which may create some empty zones within the WGS84 bounding box:
+
+.. image:: media/europe_07.png
+   :alt: arome
+   :scale: 50 %
+   :align: center
+
+Note that when the run time is fairly new, all the time steps are not available, they are progressively being pushed to the web service. So there is some chance that the latest run time is not complete. This is why we created the ``check_run_time`` method. The argument is the horizon of the forecasts, expressed in hours, that you want. Suppose that you are interested in the next 24 hours, starting from now:
+
+.. code:: ipython3
+
+    fetcher.check_run_time(horizon=24)
+
+.. parsed-literal::
+
+    -- DescribeCoverage request --
+    Switched to previous (Python index: -2) run time
+    -- DescribeCoverage request --
+
+What ``check_run_time`` does, is looping through the available run times from latest to oldest, until the time steps corresponding to the next 24 hours are found, and then setting this run time/CoverageId.
