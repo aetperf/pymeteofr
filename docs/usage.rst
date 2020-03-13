@@ -343,7 +343,10 @@ This is a bounding box expressed in WGS84 (EPSG:4326) CRS. However the computati
    :scale: 50 %
    :align: center
 
-Note that when the run time is fairly new, all the time steps are not available yet: they are progressively being pushed to the web service. So there is some chance that the latest run time is not complete. This is why we created the ``check_run_time`` method. The argument is the horizon of the forecasts, expressed in hours, that you want. Suppose that you are interested in the next 24 hours, starting from now:
+Setting the horizon of interest
+===============================
+
+When the run time is fairly new, all the time steps are not available yet: they are progressively being pushed to the web service. So there is some chance that the latest run time is not complete. This is why we created the ``check_run_time`` method. The argument is the horizon of the forecasts, expressed in hours, that you want. Suppose that you are interested in the next 24 hours, starting from now:
 
 .. code:: ipython3
 
@@ -355,4 +358,34 @@ Note that when the run time is fairly new, all the time steps are not available 
     Switched to previous (Python index: -2) run time
     -- DescribeCoverage request --
 
-What ``check_run_time`` does, is looping through the available run times from latest to oldest, until the time steps corresponding to the next 24 hours are found, and then setting this run time/CoverageId.
+What ``check_run_time`` does, is looping through the available run times from latest to oldest, until the time steps corresponding to the next 24 hours are found, and then setting this run time/CoverageId. Also it creates a list of the time steps of interest:
+
+.. code:: ipython3
+
+	fetcher.check_run_time(4)
+
+.. parsed-literal::
+
+	-- DescribeCoverage request --
+
+.. code:: ipython3
+
+	fetcher.requested_dts
+
+.. parsed-literal::
+
+	['2020-03-13T17:00:00Z',
+	 '2020-03-13T18:00:00Z',
+	 '2020-03-13T19:00:00Z',
+	 '2020-03-13T20:00:00Z']
+
+.. code:: ipython3
+
+	from datetime import datetime
+	datetime.now().isoformat()
+
+.. parsed-literal::
+
+	'2020-03-13T17:02:16.522364'
+
+These datetimes always are in the future. These are the time steps that we are going to fetch with the ``create_3D_array`` method.
