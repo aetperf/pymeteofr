@@ -267,3 +267,13 @@ We can now choose an earlier run time when selecting a CoverageId:
 
     'RELATIVE_HUMIDITY__SPECIFIC_HEIGHT_LEVEL_ABOVE_GROUND___2020-02-23T03.00.00Z'
 
+The ``Fetcher`` object also has a ``run_time`` attribute:
+
+.. code:: ipython3
+
+	fetcher.run_time
+
+.. parsed-literal::
+
+	'2020-02-23T03.00.00Z'
+
