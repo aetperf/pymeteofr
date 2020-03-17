@@ -338,7 +338,7 @@ While the spatial coverage is given by the ``max_bbox`` attribute:
 
 This is a bounding box expressed in WGS84 (EPSG:4326) CRS. However the computation uses a different CRS, which may create some empty zones within the WGS84 bounding box:
 
-.. image:: ./media/europe_07.png
+.. image:: media/europe_07.png
    :alt: arome
    :scale: 50 %
    :align: center
