@@ -13,13 +13,13 @@ Setting the web service token
 
 First we need to import the ``Fetcher`` class:
 
-.. code:: ipython3
+.. code-block:: python
 
     from pymeteofr import Fetcher
 
 You can instanciate a ``Fetcher`` object without a token:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher = Fetcher()
     fetcher.token is None
@@ -31,7 +31,7 @@ You can instanciate a ``Fetcher`` object without a token:
 The token can later be fetched using a credentials JSON file of
 the form:
 
-.. code:: json
+.. code-block:: json
 
    {
        "username": "john.doe",
@@ -40,7 +40,7 @@ the form:
 
 This is done with the ``credentials_file_path`` argument of the ``fetch_token`` method:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.fetch_token(credentials_file_path='/home/john/Workspace/pymeteofr/notebooks/credentials.json')
 
@@ -50,7 +50,7 @@ This is done with the ``credentials_file_path`` argument of the ``fetch_token`` 
 
 Or by directly giving a username and password:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.fetch_token(username="john.doe", password="1234")
 
@@ -62,7 +62,7 @@ These username and password are the ones we got from support.inspire@meteo.fr. P
 
 Finally the token can be directly given as an argument when instanciating the ``Fetcher`` object:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher = Fetcher(token="__xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx__")
 
@@ -157,7 +157,7 @@ Now that the token is set, we need to choose which weather-related product we ar
 
 Note that we do not need to enter all the arguments, but just give enough information to select a single product. In the following example, we select two products instead of one, which raises an error:
 
-.. code:: ipython3
+.. code-block:: python
 
     try:
         fetcher.select_product(dataset="arome", area="france")
@@ -173,7 +173,7 @@ Note that we do not need to enter all the arguments, but just give enough inform
 
 In this other example, no product matches the given criteria:
 
-.. code:: ipython3
+.. code-block:: python
 
     try:
         fetcher.select_product(dataset="arome", area="france", accuracy=0.03)
@@ -186,7 +186,7 @@ In this other example, no product matches the given criteria:
 
 Now here is a case where a single produt is selected:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.select_product(dataset="arome", area="france", accuracy=0.01)
 
@@ -195,7 +195,7 @@ Now here is a case where a single produt is selected:
 
 This triggers a ``GetCapabilities`` request which returns some information about the selected product, mainly the list of available titles (variables) associated with the product:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.list_titles()
 
@@ -230,7 +230,7 @@ A CoverageId is a combination of ``title`` and ``run_time``. The ``title`` is a 
 
 So when we select a ``CoverageId`` we can enter the ``title`` and ``run_time`` as attributes to the ``select_coverage_id`` method. Actually, the ``title`` is mandatory but not the ``run_time``. If not entered, the latest available ``run_time`` is chosen. Let us choose for example the 'Pressure' ``title``:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.select_coverage_id(title='Pressure')
     fetcher.CoverageId
@@ -241,7 +241,7 @@ So when we select a ``CoverageId`` we can enter the ``title`` and ``run_time`` a
 
 The ``run_time`` information as well as the list of ``titles`` is re-built at each ``GetCapabilities`` request, for example when we select a product. However we can simply refresh this information with the ``update`` method:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.update()
 
@@ -250,7 +250,7 @@ The ``run_time`` information as well as the list of ``titles`` is re-built at ea
 
 This can be useful for example if several hours have passed since a product was chosen. Now what if we want to look at the list of available run times? This is done using the ``list_available_run_times`` method:
 
-.. code:: ipython3
+.. code-block:: python
 
     run_times = fetcher.list_available_run_times('Relative humidity at specified height level above ground')
     print(run_times)
@@ -261,7 +261,7 @@ This can be useful for example if several hours have passed since a product was 
 
 We can now choose an earlier run time when selecting a CoverageId:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.select_coverage_id(title='Relative humidity at specified height level above ground', run_time=run_times[1])
     fetcher.CoverageId
@@ -272,7 +272,7 @@ We can now choose an earlier run time when selecting a CoverageId:
 
 The ``Fetcher`` object also has a ``run_time`` attribute:
 
-.. code:: ipython3
+.. code-block:: python
 
 	fetcher.run_time
 
@@ -285,7 +285,7 @@ Describing a CoverageId
 
 Now that we selected a CoverageId, which corresponds to a run of a model, we need to know what's inside in terms of spatial and temporal coverage. This is why we have a ``describe`` method, which uses a ``DescribeCoverage`` request to fetch the maximum bounding box, and the available time steps of the simulation results.
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.describe()
 
@@ -295,7 +295,7 @@ Now that we selected a CoverageId, which corresponds to a run of a model, we nee
 
 We can then have a list of the available time steps at the time of the request with the ``dts`` attribute:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.dts
 
@@ -328,7 +328,7 @@ We can then have a list of the available time steps at the time of the request w
 
 While the spatial coverage is given by the ``max_bbox`` attribute:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.max_bbox
 
@@ -348,7 +348,7 @@ Setting the horizon of interest
 
 When the run time is fairly new, all the time steps are not available yet: they are progressively being pushed to the web service. So there is some chance that the latest run time is not complete. This is why we created the ``check_run_time`` method. The argument is the horizon of the forecasts, expressed in hours, that you want. Suppose that you are interested in the next 24 hours, starting from now:
 
-.. code:: ipython3
+.. code-block:: python
 
     fetcher.check_run_time(horizon=24)
 
@@ -360,15 +360,16 @@ When the run time is fairly new, all the time steps are not available yet: they 
 
 What ``check_run_time`` does, is looping through the available run times from latest to oldest, until the time steps corresponding to the next 24 hours are found, and then setting this run time/CoverageId. Also it creates a list of the time steps of interest:
 
-.. code:: ipython3
 
-	fetcher.check_run_time(4)
+.. code-block:: python
+
+  fetcher.check_run_time(4)
 
 .. parsed-literal::
 
 	-- DescribeCoverage request --
 
-.. code:: ipython3
+.. code-block:: python
 
 	fetcher.requested_dts
 
@@ -379,7 +380,7 @@ What ``check_run_time`` does, is looping through the available run times from la
 	 '2020-03-13T19:00:00Z',
 	 '2020-03-13T20:00:00Z']
 
-.. code:: ipython3
+.. code-block:: python
 
 	from datetime import datetime
 	datetime.now().isoformat()
