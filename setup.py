@@ -9,7 +9,6 @@ with open("HISTORY.rst", "r") as history_file:
     history = history_file.read()
 
 requirements = [
-    "pyproj>=3.0.0",
     "requests",
     "matplotlib",
     "numpy",
@@ -32,14 +31,13 @@ test_requirements = []
 setup(
     author="Francois Pacull",
     author_email="francois.pacull@architecture-performance.fr",
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
