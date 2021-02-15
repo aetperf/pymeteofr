@@ -9,6 +9,7 @@ with open("HISTORY.rst", "r") as history_file:
     history = history_file.read()
 
 requirements = [
+    "pyproj>=3.0.0",
     "requests",
     "matplotlib",
     "numpy",
